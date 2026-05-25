@@ -1,0 +1,203 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Tokens light (fallback) ───────────────── */
+@layer base {
+  :root {
+    --background: 37 28% 94%;
+    --foreground: 0 0% 3%;
+    --card: 37 28% 94%;
+    --card-foreground: 0 0% 3%;
+    --popover: 37 28% 94%;
+    --popover-foreground: 0 0% 3%;
+    --primary: 23 90% 52%;
+    --primary-foreground: 37 28% 94%;
+    --secondary: 23 60% 92%;
+    --secondary-foreground: 23 90% 35%;
+    --muted: 30 15% 88%;
+    --muted-foreground: 0 0% 47%;
+    --accent: 23 60% 92%;
+    --accent-foreground: 23 90% 35%;
+    --destructive: 0 37% 59%;
+    --destructive-foreground: 37 28% 94%;
+    --border: 30 15% 84%;
+    --input: 30 15% 84%;
+    --ring: 23 90% 52%;
+    --radius: 0.625rem;
+  }
+
+  /* ── Tokens dark ───────────────────────── */
+  .dark {
+    --background: 0 0% 7%;
+    --foreground: 0 0% 93%;
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 93%;
+    --popover: 0 0% 12%;
+    --popover-foreground: 0 0% 93%;
+    --primary: 23 90% 52%;
+    --primary-foreground: 37 28% 94%;
+    --secondary: 0 0% 16%;
+    --secondary-foreground: 23 80% 70%;
+    --muted: 0 0% 16%;
+    --muted-foreground: 0 0% 57%;
+    --accent: 0 0% 16%;
+    --accent-foreground: 23 80% 70%;
+    --destructive: 0 37% 51%;
+    --destructive-foreground: 37 28% 94%;
+    --border: 0 0% 20%;
+    --input: 0 0% 16%;
+    --ring: 23 90% 52%;
+    color-scheme: dark;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  html { overflow-x: hidden; width: 100%; }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    overflow-x: hidden;
+    width: 100%;
+    position: relative;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+  /* Radix UI adds padding-right to body when any Dialog/Select portal opens
+     (to compensate for scrollbar disappearing). On mobile this causes a
+     visible horizontal shift. Force it to zero. */
+  body[data-scroll-locked] { padding-right: 0 !important; }
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { @apply bg-neutral-700 rounded-full; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-neutral-600; }
+}
+
+@layer utilities {
+  .scrollbar-hide { scrollbar-width: none; }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+}
+
+/* ═══════════════════════════════════════════════
+   DARK MODE — override hardcoded Tailwind classes
+   Scope: .dark on <html> → higher specificity wins
+   ═══════════════════════════════════════════════ */
+
+/* ── Backgrounds ───────────────────────────── */
+.dark .bg-white                { background-color: hsl(0 0% 10%) !important; }
+.dark .bg-slate-50             { background-color: hsl(0 0% 12%) !important; }
+.dark .bg-slate-50\/30         { background-color: hsl(0 0% 12% / 0.3) !important; }
+.dark .bg-slate-50\/50         { background-color: hsl(0 0% 12% / 0.5) !important; }
+.dark .bg-slate-50\/60         { background-color: hsl(0 0% 12% / 0.6) !important; }
+.dark .bg-slate-50\/80         { background-color: hsl(0 0% 12% / 0.8) !important; }
+.dark .bg-slate-100            { background-color: hsl(0 0% 15%) !important; }
+.dark .bg-slate-200            { background-color: hsl(0 0% 18%) !important; }
+
+/* ── Text ──────────────────────────────────── */
+.dark .text-slate-900          { color: hsl(0 0% 93%) !important; }
+.dark .text-slate-800          { color: hsl(0 0% 86%) !important; }
+.dark .text-slate-700          { color: hsl(0 0% 76%) !important; }
+.dark .text-slate-600          { color: hsl(0 0% 63%) !important; }
+.dark .text-slate-500          { color: hsl(0 0% 52%) !important; }
+.dark .text-slate-400          { color: hsl(0 0% 40%) !important; }
+.dark .text-slate-300          { color: hsl(0 0% 32%) !important; }
+
+/* ── Borders ───────────────────────────────── */
+.dark .border-slate-50         { border-color: hsl(0 0% 16%) !important; }
+.dark .border-slate-100        { border-color: hsl(0 0% 19%) !important; }
+.dark .border-slate-200        { border-color: hsl(0 0% 24%) !important; }
+
+/* ── Dividers ──────────────────────────────── */
+.dark .divide-slate-50  > :not([hidden]) ~ :not([hidden]) { border-color: hsl(0 0% 16%); }
+.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) { border-color: hsl(0 0% 19%); }
+
+/* ── Hover backgrounds ─────────────────────── */
+.dark .hover\:bg-white:hover      { background-color: hsl(0 0% 16%) !important; }
+.dark .hover\:bg-slate-50:hover   { background-color: hsl(0 0% 16%) !important; }
+.dark .hover\:bg-slate-100:hover  { background-color: hsl(0 0% 19%) !important; }
+
+/* ── Hover text ────────────────────────────── */
+.dark .hover\:text-slate-700:hover  { color: hsl(0 0% 76%) !important; }
+.dark .hover\:text-slate-800:hover  { color: hsl(0 0% 86%) !important; }
+.dark .hover\:text-slate-900:hover  { color: hsl(0 0% 93%) !important; }
+
+/* ── Hover borders ─────────────────────────── */
+.dark .hover\:border-slate-300:hover { border-color: hsl(0 0% 35%) !important; }
+
+/* ── Orange accent in dark ─────────────────── */
+.dark .bg-orange-50             { background-color: hsl(23 70% 11%) !important; }
+.dark .bg-orange-50\/20         { background-color: hsl(23 70% 11% / 0.2) !important; }
+.dark .bg-orange-50\/30         { background-color: hsl(23 70% 11% / 0.3) !important; }
+.dark .bg-orange-50\/40         { background-color: hsl(23 70% 11% / 0.4) !important; }
+.dark .bg-orange-50\/50         { background-color: hsl(23 70% 11% / 0.5) !important; }
+.dark .bg-orange-100            { background-color: hsl(23 70% 16%) !important; }
+.dark .border-orange-100        { border-color: hsl(23 60% 22%) !important; }
+.dark .border-orange-200        { border-color: hsl(23 60% 28%) !important; }
+.dark .text-orange-700          { color: hsl(23 90% 62%) !important; }
+.dark .text-orange-400          { color: hsl(23 90% 55%) !important; }
+.dark .hover\:bg-orange-50\/20:hover { background-color: hsl(23 70% 14% / 0.35) !important; }
+.dark .hover\:bg-orange-100:hover    { background-color: hsl(23 70% 18%) !important; }
+.dark .hover\:border-orange-100:hover { border-color: hsl(23 60% 26%) !important; }
+.dark .hover\:border-orange-200:hover { border-color: hsl(23 60% 30%) !important; }
+.dark .ring-orange-200          { --tw-ring-color: hsl(23 60% 22%) !important; }
+
+/* ── Colored badge/stat bg in dark ────────── */
+.dark .bg-emerald-50            { background-color: hsl(119 25% 9%) !important; }
+.dark .text-emerald-700         { color: hsl(119 25% 52%) !important; }
+.dark .text-emerald-600         { color: hsl(119 25% 48%) !important; }
+.dark .text-emerald-500         { color: hsl(119 25% 42%) !important; }
+.dark .border-emerald-100       { border-color: hsl(119 20% 16%) !important; }
+
+.dark .bg-red-50                { background-color: hsl(0 37% 9%) !important; }
+.dark .text-red-600             { color: hsl(0 37% 60%) !important; }
+.dark .hover\:text-red-600:hover { color: hsl(0 37% 60%) !important; }
+.dark .hover\:bg-red-50:hover   { background-color: hsl(0 37% 12%) !important; }
+
+.dark .bg-blue-50               { background-color: hsl(216 47% 9%) !important; }
+.dark .text-blue-700            { color: hsl(216 47% 60%) !important; }
+.dark .text-blue-600            { color: hsl(216 47% 55%) !important; }
+.dark .border-indigo-100        { border-color: hsl(230 50% 20%) !important; }
+
+/* ── Placeholder text ──────────────────────── */
+.dark .placeholder\:text-slate-400::placeholder { color: hsl(0 0% 35%) !important; }
+
+/* ── Form elements ─────────────────────────── */
+.dark input:not([type="checkbox"]):not([type="radio"]),
+.dark textarea,
+.dark select {
+  background-color: hsl(0 0% 13%);
+  color: hsl(0 0% 90%);
+  border-color: hsl(0 0% 22%);
+}
+.dark input:not([type="checkbox"]):not([type="radio"]):focus,
+.dark textarea:focus {
+  border-color: hsl(23 80% 45%);
+}
+
+/* ── Focus rings ───────────────────────────── */
+.dark .focus-within\:border-orange-400:focus-within { border-color: hsl(23 80% 45%) !important; }
+
+/* ── Shadow card ───────────────────────────── */
+.dark .shadow-card {
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.4);
+}
+.dark .hover\:shadow-card-hover:hover {
+  box-shadow: 0 4px 16px 0 rgb(0 0 0 / 0.5);
+}
+
+/* ── Modal overlay ─────────────────────────── */
+.dark .bg-slate-900\/40 { background-color: hsl(0 0% 0% / 0.65) !important; }
+
+/* ── Collaborator read-only mode ───────────── */
+.perm-readonly button:not([data-perm-allow]),
+.perm-readonly [role="button"]:not([data-perm-allow]),
+.perm-readonly input:not([readonly]),
+.perm-readonly select,
+.perm-readonly textarea,
+.perm-readonly [role="switch"],
+.perm-readonly [role="slider"],
+.perm-readonly [role="combobox"],
+.perm-readonly [role="checkbox"] {
+  pointer-events: none !important;
+  opacity: 0.45 !important;
+  cursor: default !important;
+}
