@@ -297,8 +297,13 @@ function MemberPayRow({ evId, mid, event }) {
 
   const handleAddPartial = () => {
     if (!newAmount || newAmount <= 0) return
+    const newTotal = paidAmount + newAmount
     addMemberPartialPayment(evId, mid, newAmount)
     setNewAmount(0)
+    if (curValue > 0 && newTotal >= curValue) {
+      setPayEntry(evId, mid, { paid: true, partial: false, paidAt: new Date().toISOString() })
+      toast.success(`${m.name} — cachê quitado automaticamente!`)
+    }
   }
 
   const handlePrint = async () => {

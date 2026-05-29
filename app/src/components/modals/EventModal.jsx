@@ -84,7 +84,7 @@ export default function EventModal({ open, onOpenChange, editId, initialData = n
 
 
   const handleSave = () => {
-    if (!form.name.trim() || !form.local.trim() || !form.date) {
+    if (!form.name.trim() || !form.date) {
       toast.error('Preencha os campos obrigatórios (*)'); return
     }
     if (editId) {

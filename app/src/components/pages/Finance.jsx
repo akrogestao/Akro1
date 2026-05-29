@@ -194,8 +194,13 @@ function ContractPaymentControl({ evId, evValue }) {
 
   const handleAddPartial = () => {
     if (!newAmount || newAmount <= 0) return
+    const newTotal = paidAmount + newAmount
     addPartialPayment(evId, newAmount)
     setNewAmount(0)
+    if (evValue > 0 && newTotal >= evValue) {
+      setContractReceipt(evId, { paid: true, partial: false, paidAmount: evValue, paidAt: new Date().toISOString() })
+      toast.success('Contrato quitado automaticamente!')
+    }
   }
 
   const DIALOG_MAP = {

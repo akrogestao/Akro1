@@ -21,7 +21,7 @@ export default function NotificationsDropdown({ notifications, unreadCount, mark
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -8 }}
       transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
-      className="absolute right-0 top-full mt-2 w-96 bg-white rounded-2xl border border-slate-200 shadow-xl z-50 overflow-hidden"
+      className="fixed left-2 right-2 top-16 sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-96 bg-white rounded-2xl border border-slate-200 shadow-xl z-50 overflow-hidden"
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">

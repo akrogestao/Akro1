@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo, useEffect, useRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Toaster } from 'sonner'
 import { UserCheck, Eye } from 'lucide-react'
@@ -114,15 +114,21 @@ function AppContent({ signOut }) {
   const [initialEventData, setInitialEventData] = useState(null)
   const [upgradeTarget, setUpgradeTarget] = useState(null)
 
-  // Seed browser history with the initial page so back button has a valid state to pop to
+  // Internal navigation stack — source of truth for swipe-back
+  const navStackRef = useRef(['dashboard'])
+
+  // Seed browser history so the native back button has a state to pop to
   useEffect(() => {
     window.history.replaceState({ page: 'dashboard' }, '')
   }, [])
 
-  // Listen for browser back/forward button
+  // Native browser back button: read the page from history state, sync our stack
   useEffect(() => {
     const handlePopState = (e) => {
       const target = e.state?.page ?? 'dashboard'
+      const stack = navStackRef.current
+      const idx = stack.lastIndexOf(target)
+      navStackRef.current = idx >= 0 ? stack.slice(0, idx + 1) : ['dashboard']
       setPage(target)
       setIsLoading(true)
       setTimeout(() => setIsLoading(false), 600)
@@ -131,7 +137,7 @@ function AppContent({ signOut }) {
     return () => window.removeEventListener('popstate', handlePopState)
   }, [])
 
-  // Swipe from left edge (< 40px) rightward to trigger browser back
+  // Swipe from left edge (< 40px) rightward → pop our internal stack directly
   useEffect(() => {
     let startX = 0
     let startY = 0
@@ -139,7 +145,17 @@ function AppContent({ signOut }) {
     const onEnd = (e) => {
       const dx = e.changedTouches[0].clientX - startX
       const dy = Math.abs(e.changedTouches[0].clientY - startY)
-      if (startX < 40 && dx > 80 && dy < 60) window.history.back()
+      if (startX < 40 && dx > 80 && dy < 60) {
+        const stack = navStackRef.current
+        if (stack.length <= 1) return
+        const newStack = stack.slice(0, -1)
+        navStackRef.current = newStack
+        const prev = newStack[newStack.length - 1]
+        window.history.replaceState({ page: prev }, '')
+        setPage(prev)
+        setIsLoading(true)
+        setTimeout(() => setIsLoading(false), 600)
+      }
     }
     document.addEventListener('touchstart', onStart, { passive: true })
     document.addEventListener('touchend', onEnd, { passive: true })
@@ -155,6 +171,7 @@ function AppContent({ signOut }) {
       else setInitialEventData(data)
     }
     if (p === page) return
+    navStackRef.current = [...navStackRef.current, p]
     window.history.pushState({ page: p }, '')
     setPage(p)
     setIsLoading(true)

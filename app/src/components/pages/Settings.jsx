@@ -452,6 +452,18 @@ function ProfileSection({ companyProfile, updateCompanyProfile }) {
               />
             </div>
 
+            {/* Cor da fonte */}
+            <div className="space-y-1.5">
+              <Label>Cor da fonte dos PDFs</Label>
+              <p className="text-[11px] text-slate-400 -mt-0.5">Usada no texto principal dos documentos</p>
+              <ColorInput
+                value={form.brandColorFont}
+                onChange={v => set('brandColorFont', v)}
+                defaultHex="#141414"
+                placeholder="Padrão Akro (#141414)"
+              />
+            </div>
+
             {/* Preview ao vivo do cabeçalho */}
             <div className="space-y-1.5">
               <Label>Preview do cabeçalho do PDF</Label>
@@ -510,13 +522,23 @@ function ProfileSection({ companyProfile, updateCompanyProfile }) {
                 </span>
               </div>
             </div>
-            <div className="flex items-center justify-between gap-4 py-2">
+            <div className="flex items-center justify-between gap-4 py-2 border-b border-slate-100 dark:border-slate-700">
               <span className="text-xs text-slate-500 dark:text-slate-400 shrink-0">Cor de destaque</span>
               <div className="flex items-center gap-2">
                 <div className="w-5 h-5 rounded border border-slate-200 dark:border-slate-600 shrink-0"
                   style={{ background: companyProfile.brandColorAccent || '#f97316' }} />
                 <span className="text-sm font-mono text-slate-900 dark:text-slate-100">
                   {companyProfile.brandColorAccent || 'Padrão Akro'}
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center justify-between gap-4 py-2">
+              <span className="text-xs text-slate-500 dark:text-slate-400 shrink-0">Cor da fonte</span>
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 rounded border border-slate-200 dark:border-slate-600 shrink-0"
+                  style={{ background: companyProfile.brandColorFont || '#141414' }} />
+                <span className="text-sm font-mono text-slate-900 dark:text-slate-100">
+                  {companyProfile.brandColorFont || 'Padrão Akro'}
                 </span>
               </div>
             </div>

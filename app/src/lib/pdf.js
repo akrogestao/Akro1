@@ -17,6 +17,24 @@ const MUTED    = [120, 120, 120]
 const HEADER_H = 28
 const FOOTER_H = 16
 
+// ── Dynamic brand colors ──────────────────────────────────────────────────
+let _colorBase   = BG_DARK
+let _colorAccent = ORANGE
+let _colorFont   = BODY_DK
+
+function hexToRgb(hex) {
+  if (!hex) return null
+  const h = hex.replace('#', '')
+  if (h.length !== 6) return null
+  return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)]
+}
+
+function resolveColors(profile) {
+  _colorBase   = hexToRgb(profile?.brandColorBase)   || BG_DARK
+  _colorAccent = hexToRgb(profile?.brandColorAccent) || ORANGE
+  _colorFont   = hexToRgb(profile?.brandColorFont)   || BODY_DK
+}
+
 const MONTHS_LONG = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
 
 function fmtCpf(cpf) {
@@ -96,9 +114,9 @@ function drawAkroMark(doc, xOff, yOff, markH) {
   const bx = xOff + 35.5 * s, by = yOff + 32.5 * s
   const cx = xOff + 0.5  * s, cy = yOff + 32.5 * s
 
-  // Orange filled triangle
-  doc.setFillColor(...ORANGE)
-  doc.setDrawColor(...ORANGE)
+  // Accent filled triangle
+  doc.setFillColor(..._colorAccent)
+  doc.setDrawColor(..._colorAccent)
   doc.setLineWidth(0.1)
   doc.lines([[bx - ax, by - ay], [cx - bx, cy - by]], ax, ay, [1, 1], 'F', true)
 
@@ -122,7 +140,7 @@ function drawAkroMark(doc, xOff, yOff, markH) {
 
 // ── Header ────────────────────────────────────────────────────────────────
 function drawHeader(doc, docTitle, fonts) {
-  doc.setFillColor(...BG_DARK)
+  doc.setFillColor(..._colorBase)
   doc.rect(0, 0, 210, HEADER_H, 'F')
 
   const markH    = 18
@@ -154,7 +172,7 @@ function drawFooter(doc, profile, fonts) {
   const H  = doc.internal.pageSize.height
   const fy = H - FOOTER_H
 
-  doc.setFillColor(...BG_DARK)
+  doc.setFillColor(..._colorBase)
   doc.rect(0, fy, 210, FOOTER_H, 'F')
 
   const { companyName, cnpj, address, city, state, phone, email } = profile || {}
@@ -212,17 +230,18 @@ function drawSignature(doc, member, companyProfile, fonts) {
 
 // ── Exports ───────────────────────────────────────────────────────────────
 export async function generateReceipt({ event, member, paidValue, companyProfile }) {
+  resolveColors(companyProfile)
   const doc   = new jsPDF({ unit: 'mm', format: 'a4' })
   const fonts = await registerFonts(doc)
   let y = drawHeader(doc, 'RECIBO DE PAGAMENTO', fonts)
 
-  doc.setTextColor(...BODY_DK)
+  doc.setTextColor(..._colorFont)
   doc.setFont(fonts.condensed, 'bold')
   doc.setFontSize(18)
   doc.text('Recibo de Pagamento', 105, y, { align: 'center' })
   y += 7
 
-  doc.setDrawColor(...ORANGE)
+  doc.setDrawColor(..._colorAccent)
   doc.setLineWidth(1.5)
   doc.line(72, y, 138, y)
   y += 12
@@ -241,7 +260,7 @@ export async function generateReceipt({ event, member, paidValue, companyProfile
     doc.setTextColor(...LABEL)
     doc.text(`${label}:`, 14, y)
     doc.setFont(fonts.body, 'normal')
-    doc.setTextColor(...BODY_DK)
+    doc.setTextColor(..._colorFont)
     doc.text(String(value), 62, y)
     y += 7
   })
@@ -249,7 +268,7 @@ export async function generateReceipt({ event, member, paidValue, companyProfile
   y += 6
 
   doc.setFillColor(...LIGHT_BG)
-  doc.setDrawColor(...ORANGE)
+  doc.setDrawColor(..._colorAccent)
   doc.setLineWidth(1)
   doc.roundedRect(14, y, 182, 26, 4, 4, 'FD')
   doc.setFont(fonts.body, 'bold')
@@ -258,7 +277,7 @@ export async function generateReceipt({ event, member, paidValue, companyProfile
   doc.text('VALOR PAGO', 105, y + 9, { align: 'center' })
   doc.setFont(fonts.mono, 'normal')
   doc.setFontSize(22)
-  doc.setTextColor(...ORANGE)
+  doc.setTextColor(..._colorAccent)
   doc.text(fmtCurrency(paidValue), 105, y + 20, { align: 'center' })
 
   drawSignature(doc, member, companyProfile, fonts)
@@ -267,11 +286,12 @@ export async function generateReceipt({ event, member, paidValue, companyProfile
 }
 
 export async function generatePayslip({ member, events, payments, companyProfile, month, year }) {
+  resolveColors(companyProfile)
   const doc   = new jsPDF({ unit: 'mm', format: 'a4' })
   const fonts = await registerFonts(doc)
   let y = drawHeader(doc, 'HOLERITE MENSAL', fonts)
 
-  doc.setTextColor(...BODY_DK)
+  doc.setTextColor(..._colorFont)
   doc.setFont(fonts.condensed, 'bold')
   doc.setFontSize(18)
   doc.text('Holerite Mensal', 105, y, { align: 'center' })
@@ -283,7 +303,7 @@ export async function generatePayslip({ member, events, payments, companyProfile
   doc.text(`Competência: ${MONTHS_LONG[month]} / ${year}`, 105, y, { align: 'center' })
   y += 5
 
-  doc.setDrawColor(...ORANGE)
+  doc.setDrawColor(..._colorAccent)
   doc.setLineWidth(1.5)
   doc.line(72, y, 138, y)
   y += 10
@@ -300,7 +320,7 @@ export async function generatePayslip({ member, events, payments, companyProfile
     doc.setTextColor(...LABEL)
     doc.text(`${label}:`, 14, y)
     doc.setFont(fonts.body, 'normal')
-    doc.setTextColor(...BODY_DK)
+    doc.setTextColor(..._colorFont)
     doc.text(String(value), 62, y)
     y += 7
   })
@@ -321,8 +341,8 @@ export async function generatePayslip({ member, events, payments, companyProfile
     head: [['Evento', 'Data', 'Local', 'Valor', 'Ajuste', 'Status']],
     body: rows,
     theme: 'grid',
-    styles:             { fontSize: 7.5, cellPadding: 2.5, textColor: BODY_DK, font: fonts.body, fontStyle: 'normal' },
-    headStyles:         { fillColor: BG_DARK, textColor: WHITE, fontStyle: 'bold', fontSize: 7.5, font: fonts.condensed },
+    styles:             { fontSize: 7.5, cellPadding: 2.5, textColor: _colorFont, font: fonts.body, fontStyle: 'normal' },
+    headStyles:         { fillColor: _colorBase, textColor: WHITE, fontStyle: 'bold', fontSize: 7.5, font: fonts.condensed },
     alternateRowStyles: { fillColor: LIGHT_BG },
     columnStyles: {
       0: { cellWidth: 48 },
@@ -355,7 +375,7 @@ export async function generatePayslip({ member, events, payments, companyProfile
   // Compact financial summary box — centred on page, 70×22mm
   const boxW = 70, boxH = 22, boxX = 105 - boxW / 2, boxCX = 105
 
-  doc.setFillColor(...BG_DARK)
+  doc.setFillColor(..._colorBase)
   doc.roundedRect(boxX, after, boxW, boxH, 2, 2, 'F')
 
   doc.setFont(fonts.condensed, 'bold')

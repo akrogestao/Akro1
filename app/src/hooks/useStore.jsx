@@ -18,7 +18,7 @@ const StoreContext = createContext(null)
 const DEFAULT_COMPANY_PROFILE = {
   companyName: '', cnpj: '', address: '', city: '', state: '',
   phone: '', email: '', proposalValidityDays: 30,
-  logoBase64: null, brandColorBase: null, brandColorAccent: null,
+  logoBase64: null, brandColorBase: null, brandColorAccent: null, brandColorFont: null,
 }
 
 // ── Row converters ────────────────────────────────────────────────────────────
@@ -92,8 +92,8 @@ const collaboratorToRow   = c => ({ id: c.id, name: c.name, email: c.email || ''
 const checklistItemFromRow = r => ({ id: r.id, eventId: r.event_id, templateId: r.template_id, text: r.text, done: r.done, doneAt: r.done_at, isCustom: r.is_custom })
 const checklistItemToRow   = i => ({ id: i.id, event_id: i.eventId, template_id: i.templateId ?? null, text: i.text, done: i.done, done_at: i.doneAt ?? null, is_custom: i.isCustom })
 
-const profileFromRow = r => ({ companyName: r.company_name, cnpj: r.cnpj, address: r.address, city: r.city, state: r.state, phone: r.phone, email: r.email, proposalValidityDays: r.proposal_validity_days, logoBase64: r.logo_base64, brandColorBase: r.brand_color_base, brandColorAccent: r.brand_color_accent })
-const profileToRow   = (p, bandId) => ({ company_name: p.companyName || '', cnpj: p.cnpj || '', address: p.address || '', city: p.city || '', state: p.state || '', phone: p.phone || '', email: p.email || '', proposal_validity_days: p.proposalValidityDays || 30, logo_base64: p.logoBase64 ?? null, brand_color_base: p.brandColorBase ?? null, brand_color_accent: p.brandColorAccent ?? null, band_id: bandId })
+const profileFromRow = r => ({ companyName: r.company_name, cnpj: r.cnpj, address: r.address, city: r.city, state: r.state, phone: r.phone, email: r.email, proposalValidityDays: r.proposal_validity_days, logoBase64: r.logo_base64, brandColorBase: r.brand_color_base, brandColorAccent: r.brand_color_accent, brandColorFont: r.brand_color_font })
+const profileToRow   = (p, bandId) => ({ company_name: p.companyName || '', cnpj: p.cnpj || '', address: p.address || '', city: p.city || '', state: p.state || '', phone: p.phone || '', email: p.email || '', proposal_validity_days: p.proposalValidityDays || 30, logo_base64: p.logoBase64 ?? null, brand_color_base: p.brandColorBase ?? null, brand_color_accent: p.brandColorAccent ?? null, brand_color_font: p.brandColorFont ?? null, band_id: bandId })
 
 // ── Load all from Supabase ─────────────────────────────────────────────────────
 

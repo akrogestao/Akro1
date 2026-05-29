@@ -32,6 +32,7 @@ const MONTHS_LONG = MONTHS
 // ── Brand color resolution ─────────────────────────────────────────────────
 let _colorBase   = BG_DARK
 let _colorAccent = ORANGE
+let _colorFont   = BODY_DK
 
 function hexToRgb(hex) {
   if (!hex) return null
@@ -43,6 +44,7 @@ function hexToRgb(hex) {
 function resolveColors(profile) {
   _colorBase   = hexToRgb(profile?.brandColorBase)   || BG_DARK
   _colorAccent = hexToRgb(profile?.brandColorAccent) || ORANGE
+  _colorFont   = hexToRgb(profile?.brandColorFont)   || BODY_DK
 }
 
 async function getImgDims(src) {
@@ -294,7 +296,7 @@ function drawHighlightBlock(doc, y, items, variant, fonts) {
     if (label) {
       doc.setFont(fonts.body, bold ? 'bold' : 'normal')
       doc.setFontSize(9)
-      doc.setTextColor(...BODY_DK)
+      doc.setTextColor(..._colorFont)
       doc.text(label, MARGIN + 7, ty)
       doc.setFont(fonts.mono, bold ? 'bold' : 'normal')
       doc.text(value ?? '', PAGE_W - MARGIN, ty, { align: 'right' })
@@ -345,9 +347,9 @@ function drawSignatureBlock(doc, member, companyProfile, fonts) {
 // ── autoTable base config ──────────────────────────────────────────────────
 const tableBase = (fonts) => ({
   theme: 'grid',
-  styles:             { fontSize: 7.5, cellPadding: 2.5, textColor: BODY_DK, font: fonts.body, fontStyle: 'normal' },
+  styles:             { fontSize: 7.5, cellPadding: 2.5, textColor: _colorFont, font: fonts.body, fontStyle: 'normal' },
   headStyles:         { fillColor: _colorBase, textColor: WHITE, fontStyle: 'bold', fontSize: 7.5, font: fonts.condensed },
-  footStyles:         { fillColor: LIGHT_BG, textColor: BODY_DK, fontStyle: 'bold', fontSize: 7.5, font: fonts.condensed },
+  footStyles:         { fillColor: LIGHT_BG, textColor: _colorFont, fontStyle: 'bold', fontSize: 7.5, font: fonts.condensed },
   alternateRowStyles: { fillColor: LIGHT_BG },
   margin:             { left: MARGIN, right: MARGIN, top: MARGIN + 5 },
 })
@@ -1023,7 +1025,7 @@ export async function generateShowReport({ eventId, state }) {
     theme: 'plain',
     startY: y,
     margin: { left: MARGIN, right: MARGIN },
-    styles:             { cellPadding: [3, 4, 3, 4], fontSize: 8.5, font: fonts.body, textColor: BODY_DK },
+    styles:             { cellPadding: [3, 4, 3, 4], fontSize: 8.5, font: fonts.body, textColor: _colorFont },
     alternateRowStyles: { fillColor: LIGHT_BG },
     columnStyles: {
       0: { cellWidth: 52, fontStyle: 'bold', textColor: LABEL, fontSize: 7 },
@@ -1184,7 +1186,7 @@ export async function generateShowReport({ eventId, state }) {
     theme: 'plain',
     startY: y,
     margin: { left: MARGIN, right: MARGIN },
-    styles:             { cellPadding: [3, 4, 3, 4], fontSize: 8.5, font: fonts.body, textColor: BODY_DK },
+    styles:             { cellPadding: [3, 4, 3, 4], fontSize: 8.5, font: fonts.body, textColor: _colorFont },
     alternateRowStyles: { fillColor: LIGHT_BG },
     columnStyles: {
       0: { cellWidth: 52, fontStyle: 'bold', textColor: LABEL, fontSize: 7 },
@@ -1377,7 +1379,7 @@ export async function generateBacklineReport({ eventId, state }) {
     theme: 'plain',
     startY: y,
     margin: { left: MARGIN, right: MARGIN },
-    styles:             { cellPadding: [3, 4, 3, 4], fontSize: 8.5, font: fonts.body, textColor: BODY_DK },
+    styles:             { cellPadding: [3, 4, 3, 4], fontSize: 8.5, font: fonts.body, textColor: _colorFont },
     alternateRowStyles: { fillColor: LIGHT_BG },
     columnStyles: {
       0: { cellWidth: 52, fontStyle: 'bold', textColor: LABEL, fontSize: 7 },
@@ -1523,7 +1525,7 @@ export async function generateBudgetPdf({ budget, companyProfile }) {
     theme: 'plain',
     startY: y,
     margin: { left: MARGIN, right: MARGIN },
-    styles:             { cellPadding: [3, 4, 3, 4], fontSize: 8.5, font: fonts.body, textColor: BODY_DK },
+    styles:             { cellPadding: [3, 4, 3, 4], fontSize: 8.5, font: fonts.body, textColor: _colorFont },
     alternateRowStyles: { fillColor: LIGHT_BG },
     columnStyles: {
       0: { cellWidth: 52, fontStyle: 'bold', textColor: LABEL, fontSize: 7 },
@@ -1777,7 +1779,7 @@ export async function generateEventExpensePDF({ event, expenses, members, paymen
         head: [['Descrição', 'Data', 'Valor']],
         body: rows,
         theme: 'plain',
-        styles: { fontSize: 8.5, cellPadding: { top: 2.5, bottom: 2.5, left: 3, right: 3 }, textColor: BODY_DK, font: fonts.body, fontStyle: 'normal' },
+        styles: { fontSize: 8.5, cellPadding: { top: 2.5, bottom: 2.5, left: 3, right: 3 }, textColor: _colorFont, font: fonts.body, fontStyle: 'normal' },
         headStyles: { fillColor: [235, 235, 235], textColor: LABEL, fontStyle: 'bold', fontSize: 8, font: fonts.condensed },
         columnStyles: { 2: { halign: 'right' } },
         margin: { left: MARGIN + 3, right: MARGIN },
