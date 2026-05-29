@@ -775,9 +775,9 @@ function ExpenseModal({ open, onOpenChange, editId, defaultEventId }) {
   return (
     <>
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md overflow-y-visible">
-        <DialogHeader><DialogTitle>{editId ? 'Editar Despesa' : 'Adicionar Despesa'}</DialogTitle></DialogHeader>
-        <div className="px-6 py-2 space-y-4">
+      <DialogContent className="max-w-md overflow-y-visible flex flex-col max-h-[90dvh]">
+        <DialogHeader className="shrink-0"><DialogTitle>{editId ? 'Editar Despesa' : 'Adicionar Despesa'}</DialogTitle></DialogHeader>
+        <div className="px-6 py-2 space-y-4 overflow-y-auto min-h-0 flex-1">
           <div className="space-y-1.5">
             <Label className="pb-2 block">Evento *</Label>
             <Select value={String(form.eventId)} onValueChange={v => {
@@ -848,7 +848,7 @@ function ExpenseModal({ open, onOpenChange, editId, defaultEventId }) {
           <div className="space-y-1.5"><Label className="pb-2 block">Descrição</Label><Input value={form.description} onChange={e => set('description', e.target.value)} placeholder="Ex: Almoço da equipe, Hotel 2 quartos..." /></div>
           <div className="space-y-1.5"><Label className="pb-2 block">Data</Label><DatePicker value={form.date} onChange={(v) => set('date', v)} placeholder="Selecione a data..." /></div>
         </div>
-        <DialogFooter>
+        <DialogFooter className="shrink-0">
           {editId && <Button variant="destructive" onClick={handleDelete} className="mr-auto gap-1.5 h-10 px-4"><Trash2 className="w-3.5 h-3.5" /> Excluir</Button>}
           <Button variant="outline" className="h-10 px-4" onClick={() => onOpenChange(false)}>Cancelar</Button>
           <Button className="h-10 px-4" onClick={handleSave}>Salvar</Button>

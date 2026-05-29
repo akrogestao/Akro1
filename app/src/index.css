@@ -66,6 +66,11 @@
      (to compensate for scrollbar disappearing). On mobile this causes a
      visible horizontal shift. Force it to zero. */
   body[data-scroll-locked] { padding-right: 0 !important; }
+  /* iOS Safari auto-zooms the viewport when focusing an input with font-size < 16px.
+     The zoom persists after blur, hiding topbar elements. Prevent by enforcing 16px on iOS. */
+  @supports (-webkit-touch-callout: none) {
+    input, select, textarea { font-size: 16px !important; }
+  }
   ::-webkit-scrollbar { width: 5px; height: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { @apply bg-neutral-700 rounded-full; }

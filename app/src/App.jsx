@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Toaster } from 'sonner'
 import { UserCheck, Eye } from 'lucide-react'
@@ -114,12 +114,48 @@ function AppContent({ signOut }) {
   const [initialEventData, setInitialEventData] = useState(null)
   const [upgradeTarget, setUpgradeTarget] = useState(null)
 
+  // Seed browser history with the initial page so back button has a valid state to pop to
+  useEffect(() => {
+    window.history.replaceState({ page: 'dashboard' }, '')
+  }, [])
+
+  // Listen for browser back/forward button
+  useEffect(() => {
+    const handlePopState = (e) => {
+      const target = e.state?.page ?? 'dashboard'
+      setPage(target)
+      setIsLoading(true)
+      setTimeout(() => setIsLoading(false), 600)
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
+
+  // Swipe from left edge (< 40px) rightward to trigger browser back
+  useEffect(() => {
+    let startX = 0
+    let startY = 0
+    const onStart = (e) => { startX = e.touches[0].clientX; startY = e.touches[0].clientY }
+    const onEnd = (e) => {
+      const dx = e.changedTouches[0].clientX - startX
+      const dy = Math.abs(e.changedTouches[0].clientY - startY)
+      if (startX < 40 && dx > 80 && dy < 60) window.history.back()
+    }
+    document.addEventListener('touchstart', onStart, { passive: true })
+    document.addEventListener('touchend', onEnd, { passive: true })
+    return () => {
+      document.removeEventListener('touchstart', onStart)
+      document.removeEventListener('touchend', onEnd)
+    }
+  }, [])
+
   const navigate = (p, data = null) => {
     if (data !== null) {
       if (data?.targetPlan !== undefined) setUpgradeTarget(data.targetPlan)
       else setInitialEventData(data)
     }
     if (p === page) return
+    window.history.pushState({ page: p }, '')
     setPage(p)
     setIsLoading(true)
     setTimeout(() => setIsLoading(false), 600)
