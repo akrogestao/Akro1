@@ -17,6 +17,7 @@ import CurrencyInput from '@/components/shared/CurrencyInput'
 import { fmtCurrency, fmtCurrencyShort, MONTHS_SHORT } from '@/lib/format'
 import { useStore } from '@/hooks/useStore'
 import { cn } from '@/lib/utils'
+import { toast } from 'sonner'
 
 const TYPE_COLOR = {
   Show: 'bg-orange-500', Festival: 'bg-blue-500', Casamento: 'bg-emerald-500',
