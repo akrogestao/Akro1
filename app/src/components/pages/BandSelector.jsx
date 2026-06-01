@@ -64,7 +64,7 @@ export default function BandSelector() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-semibold text-sm truncate">{band.name}</p>
-              <p className="text-xs text-slate-500 capitalize mt-0.5">{band.plan === 'multi_bandas' ? 'Multi-bandas' : 'Solo'}</p>
+              <p className="text-xs text-slate-500 capitalize mt-0.5">{band.plan === 'multi_bandas' ? 'Multi-bandas' : 'Profissional'}</p>
             </div>
             {activeBand?.id === band.id && <Check className="w-4 h-4 text-orange-400 shrink-0" />}
           </motion.button>

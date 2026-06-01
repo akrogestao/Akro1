@@ -51,15 +51,15 @@ export function usePlanLimits() {
   if (!activeBand) {
     return {
       limits: LOADING_LIMITS,
-      plan: 'solo',
+      plan: 'profissional',
       canAddMember: () => false,
       canAddCollaborator: () => false,
       isFeatureAvailable: () => false,
     }
   }
 
-  const plan = activeBand.plan || 'solo'
-  const limits = PLAN_LIMITS[plan] ?? PLAN_LIMITS.solo
+  const plan = activeBand.plan || 'profissional'
+  const limits = PLAN_LIMITS[plan] ?? PLAN_LIMITS.profissional
 
   const canAddMember = (currentCount) => currentCount < limits.maxMembers
   const canAddCollaborator = (currentCount) => currentCount < limits.maxCollaborators

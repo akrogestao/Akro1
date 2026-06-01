@@ -2,28 +2,27 @@ import { Zap } from 'lucide-react'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 
 const PLANS = [
-  { id: 'solo',         name: 'Solo' },
   { id: 'profissional', name: 'Profissional' },
   { id: 'multi_bandas', name: 'Multi-bandas' },
 ]
 
-const PLAN_INDEX = { solo: 0, profissional: 1, multi_bandas: 2 }
-const PLAN_NAMES = { solo: 'Solo', profissional: 'Profissional', multi_bandas: 'Multi-bandas' }
+const PLAN_INDEX = { profissional: 0, multi_bandas: 1 }
+const PLAN_NAMES = { profissional: 'Profissional', multi_bandas: 'Multi-bandas' }
 
 const FEATURE_PLAN_INFO = {
-  'Adicionar mais membros ao seu elenco':   ['Até 8 membros',            'Até 25 membros',           'Membros ilimitados'],
-  'Adicionar colaboradores ao sistema':      ['Sem colaboradores',        'Colaboradores ilimitados', 'Colaboradores ilimitados'],
-  'Checklist de produção':                   ['Não disponível',           'Disponível',               'Disponível'],
-  'Criar orçamentos e propostas comerciais': ['Não disponível',           'Disponível',               'Disponível'],
-  'Controle de equipamentos':                ['Não disponível',           'Disponível',               'Disponível'],
-  'Gestão de ensaios':                       ['Não disponível',           'Disponível',               'Disponível'],
-  'Relatórios completos em PDF':             ['Apenas holerite',          'Todos os relatórios',      'Todos os relatórios'],
-  'Gerenciar múltiplas bandas':              ['1 banda',                  '1 banda',                  'Até 5 bandas'],
+  'Adicionar mais membros ao seu elenco':   ['Até 25 membros',           'Membros ilimitados'],
+  'Adicionar colaboradores ao sistema':      ['Colaboradores ilimitados', 'Colaboradores ilimitados'],
+  'Checklist de produção':                   ['Disponível',               'Disponível'],
+  'Criar orçamentos e propostas comerciais': ['Disponível',               'Disponível'],
+  'Controle de equipamentos':                ['Disponível',               'Disponível'],
+  'Gestão de ensaios':                       ['Disponível',               'Disponível'],
+  'Relatórios completos em PDF':             ['Todos os relatórios',      'Todos os relatórios'],
+  'Gerenciar múltiplas bandas':              ['1 banda',                  'Até 5 bandas'],
 }
 
-const DEFAULT_PLAN_INFO = ['Não disponível', 'Disponível', 'Disponível']
+const DEFAULT_PLAN_INFO = ['Disponível', 'Disponível']
 
-export default function UpgradeModal({ isOpen, onClose, feature = '', currentPlan = 'solo', onNav }) {
+export default function UpgradeModal({ isOpen, onClose, feature = '', currentPlan = 'profissional', onNav }) {
   const currentIdx = PLAN_INDEX[currentPlan] ?? 0
   const planInfo   = FEATURE_PLAN_INFO[feature] || DEFAULT_PLAN_INFO
   const planName   = PLAN_NAMES[currentPlan] || 'atual'

@@ -272,7 +272,7 @@ export default function Topbar({ current, onMenuOpen, onNav = () => {} }) {
             isOpen={upgradeOpen}
             onClose={() => setUpgradeOpen(false)}
             feature="Gerenciar múltiplas bandas"
-            currentPlan={activeBand?.plan || 'solo'}
+            currentPlan={activeBand?.plan || 'profissional'}
             onNav={onNav}
           />
         </div>

@@ -72,7 +72,7 @@ export default function Checklist({ isLoading, onNav }) {
         </div>
         <div className="flex flex-col items-center justify-center py-20 rounded-2xl border border-dashed border-slate-200 bg-slate-50">
           <Lock className="w-10 h-10 text-slate-400 mb-3" />
-          <p className="text-sm text-slate-400">Este recurso não está disponível no plano Solo</p>
+          <p className="text-sm text-slate-400">Este recurso não está disponível no seu plano atual</p>
           <button
             onClick={() => setUpgradeOpen(true)}
             className="mt-4 px-4 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium transition-colors"
