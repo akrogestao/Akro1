@@ -23,9 +23,12 @@ import LoginScreen from '@/components/pages/LoginScreen'
 import Auth from '@/components/pages/Auth'
 import BandSelector from '@/components/pages/BandSelector'
 import Upgrade from '@/components/pages/Upgrade'
+import PaymentSuccess from '@/components/pages/PaymentSuccess'
+import TrialExpired from '@/components/pages/TrialExpired'
 import { StoreProvider, useStore } from '@/hooks/useStore'
 import { AuthProvider, useAuth } from '@/hooks/useAuth.jsx'
 import { BandProvider, useBand } from '@/hooks/useBand.jsx'
+import { useSubscription } from '@/hooks/useSubscription.js'
 import { cn } from '@/lib/utils'
 
 const PAGE_PERMISSION_MAP = {
@@ -114,6 +117,9 @@ function AppContent({ signOut }) {
   const [initialEventData, setInitialEventData] = useState(null)
   const [upgradeTarget, setUpgradeTarget] = useState(null)
 
+  const { isTrialing, isActive, isExpired, daysLeftInTrial, isBetaUser } = useSubscription()
+  const showTrialBanner = isTrialing && !isBetaUser
+
   // Internal navigation stack — source of truth for swipe-back
   const navStackRef = useRef(['dashboard'])
 
@@ -195,9 +201,13 @@ function AppContent({ signOut }) {
     equipment:   <Equipment    {...pageProps} />,
     budgets:     <Budgets      {...pageProps} />,
     rehearsals:  <Rehearsals   {...pageProps} />,
-    settings:    <SettingsErrorBoundary key="settings-eb"><Settings {...pageProps} /></SettingsErrorBoundary>,
-    upgrade:     <Upgrade      {...pageProps} targetPlan={upgradeTarget} />,
+    settings:         <SettingsErrorBoundary key="settings-eb"><Settings {...pageProps} /></SettingsErrorBoundary>,
+    upgrade:          <Upgrade       {...pageProps} targetPlan={upgradeTarget} />,
+    'payment-success':<PaymentSuccess {...pageProps} />,
   }
+
+  const EXEMPT_PAGES = ['upgrade', 'payment-success']
+  if (isExpired && !EXEMPT_PAGES.includes(page)) return <TrialExpired />
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -227,7 +237,32 @@ function AppContent({ signOut }) {
             </button>
           </div>
         )}
-        <main className={cn('min-h-screen', activeCollab ? 'pt-22' : 'pt-14')}>
+
+        {showTrialBanner && (
+          <div className={cn(
+            'fixed left-0 right-0 md:left-56 z-20 h-10 flex items-center justify-between px-4 sm:px-6 gap-3',
+            'bg-gradient-to-r from-orange-600 to-orange-500',
+            activeCollab ? 'top-[5.5rem]' : 'top-14'
+          )}>
+            <span className="text-xs text-white font-medium truncate">
+              Seu trial expira em {daysLeftInTrial} dia{daysLeftInTrial !== 1 ? 's' : ''} — Assine agora para não perder o acesso
+            </span>
+            <button
+              onClick={() => navigate('upgrade')}
+              className="shrink-0 bg-white text-orange-600 px-3 py-1 rounded-full text-xs font-bold hover:bg-orange-50 transition-colors"
+            >
+              Assinar
+            </button>
+          </div>
+        )}
+
+        <main className={cn(
+          'min-h-screen',
+          activeCollab && showTrialBanner ? 'pt-32'
+          : activeCollab                  ? 'pt-22'
+          : showTrialBanner               ? 'pt-24'
+          :                                 'pt-14'
+        )}>
           <div className="max-w-6xl mx-auto px-3 sm:px-5 md:px-6 py-5 md:py-7">
             <AnimatePresence mode="wait">
               <motion.div key={page} variants={pageVariants} initial="initial" animate="animate" exit="exit">

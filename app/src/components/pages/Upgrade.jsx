@@ -1,35 +1,47 @@
 import { useState } from 'react'
-import { Zap, ArrowLeft } from 'lucide-react'
-import { supabase } from '@/lib/supabase'
+import { Check, ArrowLeft, Zap } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth.jsx'
-import { useBand } from '@/hooks/useBand.jsx'
-import { toast } from 'sonner'
+import { initiateCheckout, PRICE_PROFISSIONAL, PRICE_MULTI_BANDAS } from '@/lib/stripe.js'
 
-const PLAN_NAMES = { solo: 'Solo', profissional: 'Profissional', multi_bandas: 'Multi-bandas' }
+const PLANS = [
+  {
+    id:       'profissional',
+    name:     'Profissional',
+    price:    'R$ 94,99',
+    priceId:  PRICE_PROFISSIONAL,
+    features: [
+      'Até 23 membros',
+      'Até 2 colaboradores',
+      'Checklist completo',
+      'Relatórios e inteligência',
+      'Todas as funcionalidades',
+    ],
+  },
+  {
+    id:       'multi_bandas',
+    name:     'Multi-bandas',
+    price:    'R$ 164,99',
+    priceId:  PRICE_MULTI_BANDAS,
+    highlight: true,
+    features: [
+      'Membros ilimitados',
+      'Até 5 colaboradores',
+      'Gerencie até 5 bandas',
+      'Orçamentos e propostas',
+      'Suporte prioritário',
+    ],
+  },
+]
 
-export default function Upgrade({ onNav, targetPlan }) {
+export default function Upgrade({ onNav }) {
   const { session } = useAuth()
-  const { activeBand } = useBand()
-  const [email, setEmail]     = useState(session?.user?.email || '')
-  const [message, setMessage] = useState('')
-  const [saving, setSaving]   = useState(false)
+  const email = session?.user?.email || ''
+  const [loading, setLoading] = useState(null)
 
-  const targetName = PLAN_NAMES[targetPlan] || 'Profissional'
-  const currentPlan = activeBand?.plan || 'solo'
-
-  const handleSubmit = async () => {
-    if (!email.trim()) { toast.error('Informe seu e-mail'); return }
-    setSaving(true)
-    const { error } = await supabase.from('upgrade_interest').insert({
-      email:        email.trim(),
-      current_plan: currentPlan,
-      target_plan:  targetPlan || null,
-      message:      message.trim() || null,
-    })
-    setSaving(false)
-    if (error) { toast.error('Erro ao enviar. Tente novamente.'); return }
-    toast.success('Anotado! Te avisamos quando os pagamentos estiverem disponíveis.')
-    onNav('dashboard')
+  const handleCheckout = async (priceId, planId) => {
+    setLoading(planId)
+    await initiateCheckout(priceId, email)
+    setLoading(null)
   }
 
   return (
@@ -37,55 +49,68 @@ export default function Upgrade({ onNav, targetPlan }) {
       className="min-h-screen flex flex-col items-center justify-center px-4 py-12"
       style={{ background: '#0a0a0a' }}
     >
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-2xl">
         <div className="flex justify-center mb-6">
-          <div className="w-20 h-20 rounded-3xl bg-orange-500/15 border border-orange-500/20 flex items-center justify-center">
-            <Zap className="w-12 h-12 text-orange-500" />
+          <div className="w-16 h-16 rounded-2xl bg-orange-500/15 border border-orange-500/20 flex items-center justify-center">
+            <Zap className="w-9 h-9 text-orange-500" />
           </div>
         </div>
 
         <h1 className="text-2xl font-bold text-white text-center mb-2">
-          Upgrade para {targetName}
+          Escolha seu plano
         </h1>
         <p className="text-sm text-slate-400 text-center mb-8">
-          Os pagamentos ainda não estão disponíveis. Deixe seu e-mail e te avisamos assim que estiverem.
+          Sem contratos. Cancele quando quiser.
         </p>
 
-        <div className="space-y-4">
-          <div>
-            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5 block">
-              E-mail
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              placeholder="seu@email.com"
-              className="w-full h-11 px-4 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-colors"
-            />
-          </div>
-
-          <div>
-            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5 block">
-              Mensagem <span className="text-slate-600 font-normal">(opcional)</span>
-            </label>
-            <textarea
-              value={message}
-              onChange={e => setMessage(e.target.value)}
-              placeholder="Algo que gostaria de nos contar..."
-              rows={3}
-              className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white text-sm placeholder-slate-500 focus:outline-none focus:border-orange-500 transition-colors resize-none"
-            />
-          </div>
-
-          <button
-            onClick={handleSubmit}
-            disabled={saving}
-            className="w-full h-11 rounded-xl bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white text-sm font-semibold transition-colors"
-          >
-            {saving ? 'Enviando...' : 'Quero ser avisado'}
-          </button>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {PLANS.map(plan => (
+            <div
+              key={plan.id}
+              className={`rounded-2xl border p-6 flex flex-col gap-5 ${
+                plan.highlight
+                  ? 'border-orange-500 bg-orange-500/10'
+                  : 'border-slate-700 bg-white/5'
+              }`}
+            >
+              {plan.highlight && (
+                <span className="self-start text-[10px] font-bold uppercase tracking-widest bg-orange-500 text-white px-2.5 py-1 rounded-full">
+                  Mais popular
+                </span>
+              )}
+              <div>
+                <p className="text-white font-bold text-xl">{plan.name}</p>
+                <p className="mt-1">
+                  <span className="text-orange-400 font-bold text-2xl">{plan.price}</span>
+                  <span className="text-slate-500 text-sm">/mês</span>
+                </p>
+              </div>
+              <ul className="space-y-2 flex-1">
+                {plan.features.map(f => (
+                  <li key={f} className="flex items-center gap-2 text-sm text-slate-300">
+                    <Check className="w-3.5 h-3.5 text-orange-500 shrink-0" />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+              <button
+                onClick={() => handleCheckout(plan.priceId, plan.id)}
+                disabled={loading === plan.id}
+                className={`w-full h-11 rounded-xl font-semibold text-sm transition-colors disabled:opacity-60 ${
+                  plan.highlight
+                    ? 'bg-orange-500 hover:bg-orange-600 text-white'
+                    : 'bg-white/10 hover:bg-white/20 text-white border border-slate-600'
+                }`}
+              >
+                {loading === plan.id ? 'Redirecionando...' : 'Assinar agora'}
+              </button>
+            </div>
+          ))}
         </div>
+
+        <p className="text-xs text-slate-500 text-center mt-6">
+          Pagamento seguro via Stripe. Cancele quando quiser.
+        </p>
 
         <div className="flex justify-center mt-6">
           <button

@@ -6,18 +6,15 @@ import { supabase } from '@/lib/supabase'
 
 const PLANS = [
   {
-    id: 'solo',
-    name: 'Solo',
-    features: ['Até 5 membros', 'Shows e contratos ilimitados', 'Financeiro e relatórios', 'Sem colaboradores'],
-  },
-  {
     id: 'profissional',
     name: 'Profissional',
+    price: 'R$ 94,99/mês',
     features: ['Até 23 membros', 'Até 2 colaboradores', 'Checklist completo', 'Todas as funcionalidades'],
   },
   {
     id: 'multi_bandas',
     name: 'Multi-bandas',
+    price: 'R$ 164,99/mês',
     features: ['Membros ilimitados', 'Até 5 colaboradores', 'Gerencie até 5 bandas', 'Suporte prioritário'],
   },
 ]
@@ -318,12 +315,11 @@ function PlanCard({ plan, selected, onSelect }) {
           : 'border-slate-700 bg-white/5 hover:border-slate-500'
       }`}
     >
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between mb-1">
         <span className="text-sm font-semibold text-white">{plan.name}</span>
-        <span className="text-[10px] font-medium bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full">
-          Trial grátis
-        </span>
       </div>
+      <p className="text-xs text-orange-400 font-medium mb-0.5">{plan.price}</p>
+      <p className="text-xs text-green-400 mb-2">14 dias grátis sem cartão</p>
       <ul className="space-y-1">
         {plan.features.map(f => (
           <li key={f} className="flex items-center gap-2 text-xs text-slate-300">
