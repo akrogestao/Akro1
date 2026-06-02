@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Mail, Lock, Eye, EyeOff, Music, CalendarCheck, DollarSign, CheckSquare, Loader2, MailCheck, Check } from 'lucide-react'
+import { Mail, Lock, Eye, EyeOff, Music, CalendarCheck, DollarSign, CheckSquare, Loader2, MailCheck, Check, RefreshCw, AlertTriangle } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth.jsx'
 import { supabase } from '@/lib/supabase'
+import { toast } from 'sonner'
 
 const PLANS = [
   {
@@ -342,9 +343,25 @@ function SignupForm({ onSwitch }) {
   const [showPwd,    setShowPwd]   = useState(false)
   const [showConf,   setShowConf]  = useState(false)
   const [selectedPlan, setSelectedPlan] = useState(null)
-  const [loading,    setLoading]   = useState(false)
-  const [error,      setError]     = useState('')
-  const [success,    setSuccess]   = useState(false)
+  const [loading,       setLoading]       = useState(false)
+  const [error,         setError]         = useState('')
+  const [success,       setSuccess]       = useState(false)
+  const [resendLoading, setResendLoading] = useState(false)
+  const [cooldown,      setCooldown]      = useState(0)
+
+  useEffect(() => {
+    if (cooldown <= 0) return
+    const t = setTimeout(() => setCooldown(c => c - 1), 1000)
+    return () => clearTimeout(t)
+  }, [cooldown])
+
+  const handleResend = async () => {
+    setResendLoading(true)
+    await supabase.auth.resend({ type: 'signup', email })
+    setResendLoading(false)
+    toast.success('Email reenviado! Verifique sua caixa de entrada.')
+    setCooldown(60)
+  }
 
   const pwdMismatch = confirm && password !== confirm
 
@@ -379,7 +396,23 @@ function SignupForm({ onSwitch }) {
         <p className="text-sm text-slate-400 text-center mt-2 max-w-xs">
           Enviamos um link de confirmação para {email}. Clique no link para ativar sua conta.
         </p>
-        <button onClick={onSwitch} className="text-sm text-orange-500 mt-6 hover:text-orange-400">
+        <p className="flex items-center gap-1.5 text-xs text-amber-400 text-center mt-3 max-w-xs">
+          <AlertTriangle size={12} className="shrink-0" />
+          Sempre use o link do email mais recente. Links anteriores expiram automaticamente.
+        </p>
+        <button
+          onClick={handleResend}
+          disabled={resendLoading || cooldown > 0}
+          className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-orange-500 mt-5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <RefreshCw size={14} className={resendLoading ? 'animate-spin' : ''} />
+          {cooldown > 0
+            ? `Reenviar em ${cooldown}s`
+            : resendLoading
+              ? 'Reenviando...'
+              : 'Reenviar email de confirmação'}
+        </button>
+        <button onClick={onSwitch} className="text-sm text-orange-500 mt-3 hover:text-orange-400">
           Voltar ao login
         </button>
       </motion.div>

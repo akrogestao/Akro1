@@ -25,6 +25,8 @@ import BandSelector from '@/components/pages/BandSelector'
 import Upgrade from '@/components/pages/Upgrade'
 import PaymentSuccess from '@/components/pages/PaymentSuccess'
 import TrialExpired from '@/components/pages/TrialExpired'
+import EmailConfirmed from '@/components/pages/EmailConfirmed'
+import EmailConfirm from '@/components/pages/EmailConfirm'
 import { StoreProvider, useStore } from '@/hooks/useStore'
 import { AuthProvider, useAuth } from '@/hooks/useAuth.jsx'
 import { BandProvider, useBand } from '@/hooks/useBand.jsx'
@@ -111,7 +113,14 @@ function AppContent({ signOut }) {
   )
 
   if (!session) return <LoginScreen />
-  const [page, setPage] = useState('dashboard')
+
+  const _initPage = (() => {
+    const p = window.location.pathname.replace(/^\//, '')
+    if (p === 'email-confirmed' || p === 'payment-success') return p
+    return 'dashboard'
+  })()
+
+  const [page, setPage] = useState(_initPage)
   const [isLoading, setIsLoading] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [initialEventData, setInitialEventData] = useState(null)
@@ -121,7 +130,7 @@ function AppContent({ signOut }) {
   const showTrialBanner = isTrialing && !isBetaUser
 
   // Internal navigation stack — source of truth for swipe-back
-  const navStackRef = useRef(['dashboard'])
+  const navStackRef = useRef([_initPage])
 
   // Seed browser history so the native back button has a state to pop to
   useEffect(() => {
@@ -203,10 +212,12 @@ function AppContent({ signOut }) {
     rehearsals:  <Rehearsals   {...pageProps} />,
     settings:         <SettingsErrorBoundary key="settings-eb"><Settings {...pageProps} /></SettingsErrorBoundary>,
     upgrade:          <Upgrade       {...pageProps} targetPlan={upgradeTarget} />,
-    'payment-success':<PaymentSuccess {...pageProps} />,
+    'payment-success':  <PaymentSuccess  {...pageProps} />,
+    'email-confirmed':  <EmailConfirmed  {...pageProps} />,
+    'email-confirm':    <EmailConfirm    {...pageProps} />,
   }
 
-  const EXEMPT_PAGES = ['upgrade', 'payment-success']
+  const EXEMPT_PAGES = ['upgrade', 'payment-success', 'email-confirmed', 'email-confirm']
   if (isExpired && !EXEMPT_PAGES.includes(page)) return <TrialExpired />
 
   return (
@@ -300,6 +311,18 @@ function BandShell({ signOut }) {
 
 function AppShell() {
   const { session: authSession, isLoading, signOut } = useAuth()
+
+  // Hash-based route: #/email-confirm — accessible without auth (email confirmation link)
+  if (window.location.hash.startsWith('#/email-confirm')) {
+    if (isLoading) return <SplashScreen />
+    return <EmailConfirm />
+  }
+
+  // Path-based route: /email-confirmed — legacy implicit-flow confirmation page
+  if (window.location.pathname === '/email-confirmed') {
+    if (isLoading) return <SplashScreen />
+    if (!authSession) return <EmailConfirmed />
+  }
 
   if (isLoading) return <SplashScreen />
   if (!authSession) return <Auth />
