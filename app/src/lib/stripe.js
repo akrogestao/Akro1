@@ -3,25 +3,43 @@ import { supabase } from '@/lib/supabase'
 export const PRICE_PROFISSIONAL = 'price_1TdWuj4W1YK1eZ3Zq2xPtq5D'
 export const PRICE_MULTI_BANDAS = 'price_1TdWvC4W1YK1eZ3Zf9mscavA'
 
-// Chama a Edge Function create-checkout-session e redireciona para o Stripe Checkout.
-// Mantém a assinatura (priceId, email) para compatibilidade com Upgrade.jsx e TrialExpired.jsx;
-// userId e bandId são obtidos internamente.
 export async function initiateCheckout(priceId, _email) {
   try {
-    const { data: { user }, error: authErr } = await supabase.auth.getUser()
-    if (authErr || !user) {
-      console.error('[Stripe] Usuário não autenticado:', authErr)
+    // userId via getSession (mesmo padrão do restante do sistema)
+    const { data: { session }, error: sessionErr } = await supabase.auth.getSession()
+    if (sessionErr || !session?.user) {
+      console.error('[Stripe] Sessão não encontrada:', sessionErr)
       return
     }
+    const userId = session.user.id
 
-    const bandId = localStorage.getItem('bm_active_band_id')
+    // bandId: tenta localStorage primeiro (setado ao trocar/adicionar banda).
+    // Para usuários com apenas a primeira banda criada automaticamente,
+    // localStorage pode estar vazio — nesse caso consulta o Supabase,
+    // espelhando o fallback que useBand.jsx usa (firstBand = bandList[0]).
+    let bandId = localStorage.getItem('bm_active_band_id')
     if (!bandId) {
-      console.error('[Stripe] bandId não encontrado no localStorage')
+      const { data: bands, error: bandsErr } = await supabase
+        .from('bands')
+        .select('id')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: true })
+        .limit(1)
+
+      if (bandsErr) {
+        console.error('[Stripe] Erro ao buscar banda:', bandsErr)
+        return
+      }
+      bandId = bands?.[0]?.id ?? null
+    }
+
+    if (!bandId) {
+      console.error('[Stripe] Nenhuma banda encontrada para o usuário', userId)
       return
     }
 
     const { data, error } = await supabase.functions.invoke('create-checkout-session', {
-      body: { priceId, userId: user.id, bandId },
+      body: { priceId, userId, bandId },
     })
 
     if (error) {
