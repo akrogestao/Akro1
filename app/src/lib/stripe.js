@@ -1,45 +1,41 @@
-import { loadStripe } from '@stripe/stripe-js'
+import { supabase } from '@/lib/supabase'
 
 export const PRICE_PROFISSIONAL = 'price_1TdWuj4W1YK1eZ3Zq2xPtq5D'
 export const PRICE_MULTI_BANDAS = 'price_1TdWvC4W1YK1eZ3Zf9mscavA'
 
-const BASE_URL = 'https://akro1.vercel.app'
-
-let _stripePromise = null
-
-export async function initiateCheckout(priceId, email) {
+// Chama a Edge Function create-checkout-session e redireciona para o Stripe Checkout.
+// Mantém a assinatura (priceId, email) para compatibilidade com Upgrade.jsx e TrialExpired.jsx;
+// userId e bandId são obtidos internamente.
+export async function initiateCheckout(priceId, _email) {
   try {
-    const key = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
-
-    // typeof é mais robusto que !key: pega undefined, null, number, etc.
-    if (typeof key !== 'string' || !key.startsWith('pk_')) {
-      console.error(
-        '[Stripe] Chave inválida ou ausente.',
-        '| tipo:', typeof key,
-        '| valor:', key ?? '(undefined/null)'
-      )
-      console.error('[Stripe] Adicione VITE_STRIPE_PUBLISHABLE_KEY nas variáveis de ambiente da Vercel e faça um novo deploy.')
+    const { data: { user }, error: authErr } = await supabase.auth.getUser()
+    if (authErr || !user) {
+      console.error('[Stripe] Usuário não autenticado:', authErr)
       return
     }
 
-    if (!_stripePromise) _stripePromise = loadStripe(key)
-    const stripe = await _stripePromise
-
-    if (!stripe) {
-      console.error('[Stripe] Instância null após loadStripe.')
+    const bandId = localStorage.getItem('bm_active_band_id')
+    if (!bandId) {
+      console.error('[Stripe] bandId não encontrado no localStorage')
       return
     }
 
-    const { error } = await stripe.redirectToCheckout({
-      lineItems:     [{ price: priceId, quantity: 1 }],
-      mode:          'subscription',
-      successUrl:    `${BASE_URL}/payment-success`,
-      cancelUrl:     `${BASE_URL}/upgrade`,
-      customerEmail: email || undefined,
+    const { data, error } = await supabase.functions.invoke('create-checkout-session', {
+      body: { priceId, userId: user.id, bandId },
     })
 
-    if (error) console.error('[Stripe] redirectToCheckout retornou erro:', error)
+    if (error) {
+      console.error('[Stripe] Erro na Edge Function create-checkout-session:', error)
+      return
+    }
+
+    if (!data?.url) {
+      console.error('[Stripe] URL de checkout não retornada. Resposta:', data)
+      return
+    }
+
+    window.location.href = data.url
   } catch (err) {
-    console.error('[Stripe] Exceção capturada no checkout:', err)
+    console.error('[Stripe] Exceção em initiateCheckout:', err)
   }
 }

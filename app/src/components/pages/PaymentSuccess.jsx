@@ -1,18 +1,32 @@
-import { useEffect } from 'react'
-import { CheckCircle } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { CheckCircle, Loader2 } from 'lucide-react'
 import { useBand } from '@/hooks/useBand.jsx'
 
 export default function PaymentSuccess({ onNav }) {
   const { activeBand, updateBand } = useBand()
+  const [countdown, setCountdown] = useState(2)
 
+  // Lê o session_id retornado pelo Stripe na success_url
+  const sessionId = new URLSearchParams(window.location.search).get('session_id')
+
+  // Atualiza o status da assinatura na banda ativa
   useEffect(() => {
-    if (activeBand?.id) {
-      updateBand(activeBand.id, {
-        subscription_status: 'active',
-        trial_ends_at:       null,
-      })
-    }
+    if (!activeBand?.id) return
+    updateBand(activeBand.id, {
+      subscription_status: 'active',
+      trial_ends_at:       null,
+    })
   }, [activeBand?.id])
+
+  // Auto-navega para o dashboard após 2 segundos
+  useEffect(() => {
+    if (countdown <= 0) {
+      onNav('dashboard')
+      return
+    }
+    const t = setTimeout(() => setCountdown(c => c - 1), 1000)
+    return () => clearTimeout(t)
+  }, [countdown])
 
   return (
     <div
@@ -26,6 +40,16 @@ export default function PaymentSuccess({ onNav }) {
         <p className="text-slate-400 text-sm">
           Sua assinatura foi ativada com sucesso. Bem-vindo ao Akro!
         </p>
+        {sessionId && (
+          <p className="text-xs text-slate-600 font-mono mt-1">
+            Sessão: {sessionId.slice(0, 24)}…
+          </p>
+        )}
+      </div>
+
+      <div className="flex items-center gap-2 text-slate-400 text-sm">
+        <Loader2 className="w-4 h-4 animate-spin" />
+        Redirecionando em {countdown}s…
       </div>
 
       <button
