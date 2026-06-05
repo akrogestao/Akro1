@@ -16,6 +16,8 @@ export default function PaymentSuccess({ onNav }) {
       subscription_status: 'active',
       trial_ends_at:       null,
     })
+    // Remove session_id da URL para que a página não reapareça em próximos logins
+    window.history.replaceState({}, '', window.location.pathname)
   }, [activeBand?.id])
 
   // Auto-navega para o dashboard após 2 segundos

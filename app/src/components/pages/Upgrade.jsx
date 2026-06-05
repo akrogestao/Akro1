@@ -1,7 +1,11 @@
 import { useState } from 'react'
-import { Check, ArrowLeft, Zap } from 'lucide-react'
+import { Check, ArrowLeft, Zap, AlertTriangle } from 'lucide-react'
 import { useAuth } from '@/hooks/useAuth.jsx'
+import { useBand } from '@/hooks/useBand.jsx'
+import { supabase } from '@/lib/supabase'
 import { initiateCheckout, PRICE_PROFISSIONAL, PRICE_MULTI_BANDAS } from '@/lib/stripe.js'
+import { toast } from 'sonner'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 
 const PLANS = [
   {
@@ -35,13 +39,37 @@ const PLANS = [
 
 export default function Upgrade({ onNav }) {
   const { session } = useAuth()
+  const { activeBand, updateBand } = useBand()
   const email = session?.user?.email || ''
   const [loading, setLoading] = useState(null)
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  const [canceling, setCanceling] = useState(false)
+
+  const isActive = activeBand?.subscription_status === 'active'
+  const currentPlan = PLANS.find(p => p.id === activeBand?.plan)
 
   const handleCheckout = async (priceId, planId) => {
     setLoading(planId)
     await initiateCheckout(priceId, email)
     setLoading(null)
+  }
+
+  const handleCancel = async () => {
+    setCanceling(true)
+    try {
+      const { error } = await supabase.functions.invoke('cancel-subscription', {
+        body: { band_id: activeBand.id },
+      })
+      if (error) throw error
+      await updateBand(activeBand.id, { subscription_status: 'canceling' })
+      toast.success('Assinatura cancelada. Acesso mantido até o fim do período atual.')
+      setConfirmOpen(false)
+    } catch (err) {
+      console.error('[cancel-subscription]', err)
+      toast.error('Erro ao cancelar assinatura. Tente novamente.')
+    } finally {
+      setCanceling(false)
+    }
   }
 
   return (
@@ -112,6 +140,26 @@ export default function Upgrade({ onNav }) {
           Pagamento seguro via Stripe. Cancele quando quiser.
         </p>
 
+        {isActive && currentPlan && (
+          <div className="mt-6 border border-slate-700 rounded-2xl p-6 bg-white/5">
+            <h2 className="text-white font-semibold text-sm mb-4">Minha assinatura</h2>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-slate-400 text-sm">Plano atual</span>
+              <span className="text-white text-sm font-medium">{currentPlan.name}</span>
+            </div>
+            <div className="flex items-center justify-between mb-5">
+              <span className="text-slate-400 text-sm">Valor mensal</span>
+              <span className="text-white text-sm font-medium">{currentPlan.price}/mês</span>
+            </div>
+            <button
+              onClick={() => setConfirmOpen(true)}
+              className="text-sm text-red-400 border border-red-400 hover:bg-red-400 hover:text-white rounded-lg px-4 py-2 transition-colors"
+            >
+              Cancelar assinatura
+            </button>
+          </div>
+        )}
+
         <div className="flex justify-center mt-6">
           <button
             onClick={() => onNav('dashboard')}
@@ -122,6 +170,35 @@ export default function Upgrade({ onNav }) {
           </button>
         </div>
       </div>
+
+      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <div className="flex items-center gap-3 mb-2">
+              <AlertTriangle className="w-5 h-5 text-red-500 shrink-0" />
+              <DialogTitle>Cancelar assinatura</DialogTitle>
+            </div>
+            <p className="text-sm text-slate-500 mt-1">
+              Ao cancelar você perderá acesso ao sistema ao fim do período atual já pago. Tem certeza?
+            </p>
+          </DialogHeader>
+          <DialogFooter className="gap-2 mt-4">
+            <button
+              onClick={() => setConfirmOpen(false)}
+              className="flex-1 h-10 rounded-lg border border-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors"
+            >
+              Manter assinatura
+            </button>
+            <button
+              onClick={handleCancel}
+              disabled={canceling}
+              className="flex-1 h-10 rounded-lg bg-red-500 hover:bg-red-600 text-white text-sm font-medium transition-colors disabled:opacity-60"
+            >
+              {canceling ? 'Cancelando...' : 'Confirmar cancelamento'}
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
