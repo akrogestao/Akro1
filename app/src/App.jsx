@@ -116,7 +116,8 @@ function AppContent({ signOut }) {
 
   const _initPage = (() => {
     const p = window.location.pathname.replace(/^\//, '')
-    if (p === 'email-confirmed' || p === 'payment-success') return p
+    if (p === 'email-confirmed') return p
+    if (p === 'payment-success' && (window.location.search.includes('session_id') || window.location.hash.includes('session_id'))) return p
     return 'dashboard'
   })()
 

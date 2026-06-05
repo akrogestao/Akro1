@@ -5,6 +5,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useStore } from '@/hooks/useStore'
+import { useBand } from '@/hooks/useBand.jsx'
 
 const navItems = [
   { id: 'dashboard',   label: 'Dashboard',      icon: LayoutDashboard, group: 'Principal' },
@@ -33,8 +34,18 @@ const NAV_PERMISSION_MAP = {
   reports: 'reports', settings: null,
 }
 
+const PLAN_LABELS = {
+  profissional: 'Plano Profissional',
+  multi_bandas: 'Plano Multi-bandas',
+}
+
 function NavContent({ current, onNav, eventCount, onClose }) {
   const { activeCollaborator, collaborators, session, switchToChief, logout } = useStore()
+  const { activeBand } = useBand()
+
+  const bandName     = activeBand?.name || 'Minha Banda'
+  const planLabel    = PLAN_LABELS[activeBand?.plan] || 'Plano Profissional'
+  const bandInitials = bandName.split(' ').filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('')
   const activeCollab = activeCollaborator
     ? collaborators.find(c => String(c.id) === String(activeCollaborator))
     : null
@@ -143,11 +154,11 @@ function NavContent({ current, onNav, eventCount, onClose }) {
       <div className="px-3 py-3 border-t border-slate-200">
         <div className="flex items-center gap-2.5 px-2 py-2 rounded-lg hover:bg-white transition-colors cursor-pointer">
           <div className="w-7 h-7 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-[10px] font-bold text-white shrink-0">
-            YM
+            {bandInitials}
           </div>
           <div className="min-w-0">
-            <div className="text-xs font-semibold text-slate-800 truncate">Yago Moreira</div>
-            <div className="text-[10px] text-slate-400">Administrador</div>
+            <div className="text-xs font-semibold text-slate-800 truncate">{bandName}</div>
+            <div className="text-[10px] text-slate-400">{planLabel}</div>
           </div>
         </div>
       </div>

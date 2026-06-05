@@ -15,7 +15,7 @@ const PLANS = [
   {
     id: 'multi_bandas',
     name: 'Multi-bandas',
-    price: 'R$ 164,99/mês',
+    price: 'R$ 194,99/mês',
     features: ['Até 5 bandas', 'Membros ilimitados', 'Colaboradores ilimitados'],
   },
 ]

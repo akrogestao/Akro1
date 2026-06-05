@@ -13,7 +13,7 @@ const PLANS = [
   {
     id:       'multi_bandas',
     name:     'Multi-bandas',
-    price:    'R$ 164,99',
+    price:    'R$ 194,99',
     priceId:  PRICE_MULTI_BANDAS,
     features: ['Membros ilimitados', 'Até 5 colaboradores', 'Gerencie até 5 bandas', 'Suporte prioritário'],
   },

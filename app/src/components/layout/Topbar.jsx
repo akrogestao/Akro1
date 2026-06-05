@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'react'
-import { Search, Bell, Menu, Music2, Check, Plus, ChevronDown, LogOut, Trash2, UserCheck } from 'lucide-react'
+import { CreditCard, CheckCircle, Bell, Menu, Music2, Check, Plus, ChevronDown, LogOut, Trash2, UserCheck } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useStore } from '@/hooks/useStore'
 import { useBand } from '@/hooks/useBand.jsx'
 import { useAuth } from '@/hooks/useAuth.jsx'
 import { usePlanLimits } from '@/hooks/usePlanLimits'
 import { useNotifications } from '@/hooks/useNotifications'
+import { useSubscription } from '@/hooks/useSubscription.js'
 import NotificationsDropdown from '@/components/shared/NotificationsDropdown'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import UpgradeModal from '@/components/shared/UpgradeModal'
@@ -27,6 +28,7 @@ export default function Topbar({ current, onMenuOpen, onNav = () => {} }) {
   const { events, members, payments, contractors, checklistItems, rehearsals, session, collaborators, activeCollaborator } = useStore()
   const { bands, activeBand, switchBand, addBand, deleteBand } = useBand()
   const { limits } = usePlanLimits()
+  const { isActive, isTrialing, isExpired, daysLeftInTrial } = useSubscription()
   const canAddBand = bands.length < limits.maxBands
   const { signOut } = useAuth()
 
@@ -121,14 +123,36 @@ export default function Topbar({ current, onMenuOpen, onNav = () => {} }) {
           </span>
         </div>
       ) : (
-        <div className="hidden sm:flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
-          <Search className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-          <input
-            type="text"
-            placeholder="Buscar eventos, membros..."
-            className="bg-transparent text-xs text-slate-700 placeholder:text-slate-400 outline-none w-36"
-          />
-        </div>
+        <button
+          onClick={() => onNav('upgrade')}
+          className={[
+            'hidden sm:flex items-center gap-2 rounded-lg px-3 py-1.5 transition-all duration-150 shrink-0',
+            isExpired
+              ? 'border border-red-400/40 bg-red-500/10 hover:bg-red-500/20'
+              : 'border border-slate-200 bg-slate-50 hover:bg-slate-100',
+          ].join(' ')}
+        >
+          {isActive
+            ? <CheckCircle className="w-3.5 h-3.5 text-green-400 shrink-0" />
+            : <CreditCard  className="w-3.5 h-3.5 text-slate-400 group-hover:text-orange-500 shrink-0" />
+          }
+          <div className="flex flex-col items-start leading-none gap-0.5">
+            <span className="text-xs font-medium text-slate-600">
+              {isExpired ? 'Assinar agora' : 'Gerenciar assinatura'}
+            </span>
+            {isActive && (
+              <span className="text-[10px] text-green-400">Assinatura ativa</span>
+            )}
+            {isTrialing && (
+              <span className="text-[10px] text-amber-400">
+                Teste grátis — {daysLeftInTrial} dia{daysLeftInTrial !== 1 ? 's' : ''} restante{daysLeftInTrial !== 1 ? 's' : ''}
+              </span>
+            )}
+            {isExpired && (
+              <span className="text-[10px] text-red-400">Trial expirado</span>
+            )}
+          </div>
+        </button>
       )}
 
       {/* Band indicator / switcher — hidden for direct collaborator sessions */}
