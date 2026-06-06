@@ -124,7 +124,7 @@ export default function Topbar({ current, onMenuOpen, onNav = () => {} }) {
         </div>
       ) : (
         <button
-          onClick={() => onNav('upgrade')}
+          onClick={() => onNav(isActive ? 'subscription' : 'upgrade')}
           className={[
             'hidden sm:flex items-center gap-2 rounded-lg px-3 py-1.5 transition-all duration-150 shrink-0',
             isExpired

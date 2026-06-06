@@ -23,6 +23,7 @@ import LoginScreen from '@/components/pages/LoginScreen'
 import Auth from '@/components/pages/Auth'
 import BandSelector from '@/components/pages/BandSelector'
 import Upgrade from '@/components/pages/Upgrade'
+import Subscription from '@/components/pages/Subscription'
 import PaymentSuccess from '@/components/pages/PaymentSuccess'
 import TrialExpired from '@/components/pages/TrialExpired'
 import EmailConfirmed from '@/components/pages/EmailConfirmed'
@@ -214,11 +215,12 @@ function AppContent({ signOut }) {
     settings:         <SettingsErrorBoundary key="settings-eb"><Settings {...pageProps} /></SettingsErrorBoundary>,
     upgrade:          <Upgrade       {...pageProps} targetPlan={upgradeTarget} />,
     'payment-success':  <PaymentSuccess  {...pageProps} />,
+    'subscription':     <Subscription    {...pageProps} />,
     'email-confirmed':  <EmailConfirmed  {...pageProps} />,
     'email-confirm':    <EmailConfirm    {...pageProps} />,
   }
 
-  const EXEMPT_PAGES = ['upgrade', 'payment-success', 'email-confirmed', 'email-confirm']
+  const EXEMPT_PAGES = ['upgrade', 'subscription', 'payment-success', 'email-confirmed', 'email-confirm']
   if (isExpired && !EXEMPT_PAGES.includes(page)) return <TrialExpired />
 
   return (
