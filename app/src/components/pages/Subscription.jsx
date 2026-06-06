@@ -58,7 +58,6 @@ export default function Subscription({ onNav }) {
   const [canceling,    setCanceling]    = useState(false)
   const [reactivating, setReactivating] = useState(false)
   const [changingPlan, setChangingPlan] = useState(null)
-  const [portalLoading, setPortalLoading] = useState(false)
   const bellRef = useRef(null)
 
   useEffect(() => {
@@ -80,22 +79,6 @@ export default function Subscription({ onNav }) {
     status === 'active'    ? { label: 'ATIVO',      cls: 'bg-green-500/20 text-green-400 border border-green-500/30' } :
     status === 'canceling' ? { label: 'CANCELANDO', cls: 'bg-amber-500/20 text-amber-400 border border-amber-500/30' } :
                              { label: 'EXPIRADO',   cls: 'bg-red-500/20   text-red-400   border border-red-500/30'   }
-
-  async function handleBillingPortal() {
-    setPortalLoading(true)
-    try {
-      const { data, error } = await supabase.functions.invoke('create-billing-portal-session', {
-        body: { band_id: activeBand.id, return_url: window.location.origin },
-      })
-      if (error) throw error
-      window.open(data.url, '_blank', 'noopener,noreferrer')
-    } catch (err) {
-      console.error('[billing-portal]', err)
-      toast.error('Não foi possível abrir o portal de faturamento.')
-    } finally {
-      setPortalLoading(false)
-    }
-  }
 
   async function handleCancel() {
     setCanceling(true)
@@ -224,24 +207,15 @@ export default function Subscription({ onNav }) {
             </p>
           )}
 
-          <div className="flex flex-wrap gap-3">
-            {!isActive && !isCanceling && (
-              <button
-                onClick={() => setShowUpgrade(v => !v)}
-                className="h-10 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium transition-colors flex items-center gap-2"
-              >
-                <Zap className="w-3.5 h-3.5" />
-                Fazer upgrade
-              </button>
-            )}
+          {!isActive && !isCanceling && (
             <button
-              onClick={handleBillingPortal}
-              disabled={portalLoading}
-              className="h-10 px-5 rounded-xl border border-slate-700 text-slate-300 hover:bg-slate-800 text-sm font-medium transition-colors disabled:opacity-60"
+              onClick={() => setShowUpgrade(v => !v)}
+              className="h-10 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium transition-colors flex items-center gap-2"
             >
-              {portalLoading ? 'Abrindo...' : 'Gerenciar faturamento'}
+              <Zap className="w-3.5 h-3.5" />
+              Fazer upgrade
             </button>
-          </div>
+          )}
         </div>
 
         {/* Seletor de upgrade — apenas para status null/trial/expired */}

@@ -214,7 +214,9 @@ function AppContent({ signOut }) {
     rehearsals:  <Rehearsals   {...pageProps} />,
     settings:         <SettingsErrorBoundary key="settings-eb"><Settings {...pageProps} /></SettingsErrorBoundary>,
     upgrade:          <Upgrade       {...pageProps} targetPlan={upgradeTarget} />,
-    'payment-success':  <PaymentSuccess  {...pageProps} />,
+    'payment-success':  (window.location.search.includes('session_id') || window.location.hash.includes('session_id'))
+      ? <PaymentSuccess  {...pageProps} />
+      : <Dashboard       {...pageProps} />,
     'subscription':     <Subscription    {...pageProps} />,
     'email-confirmed':  <EmailConfirmed  {...pageProps} />,
     'email-confirm':    <EmailConfirm    {...pageProps} />,
