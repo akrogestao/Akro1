@@ -225,13 +225,15 @@ export default function Subscription({ onNav }) {
           )}
 
           <div className="flex flex-wrap gap-3">
-            <button
-              onClick={() => setShowUpgrade(v => !v)}
-              className="h-10 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium transition-colors flex items-center gap-2"
-            >
-              <Zap className="w-3.5 h-3.5" />
-              Fazer upgrade
-            </button>
+            {!isActive && !isCanceling && (
+              <button
+                onClick={() => setShowUpgrade(v => !v)}
+                className="h-10 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium transition-colors flex items-center gap-2"
+              >
+                <Zap className="w-3.5 h-3.5" />
+                Fazer upgrade
+              </button>
+            )}
             <button
               onClick={handleBillingPortal}
               disabled={portalLoading}
@@ -242,9 +244,9 @@ export default function Subscription({ onNav }) {
           </div>
         </div>
 
-        {/* Seletor de upgrade */}
+        {/* Seletor de upgrade — apenas para status null/trial/expired */}
         <AnimatePresence initial={false}>
-          {showUpgrade && (
+          {showUpgrade && !isActive && !isCanceling && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
@@ -321,12 +323,88 @@ export default function Subscription({ onNav }) {
             </p>
 
             {isActive && (
-              <button
-                onClick={() => setConfirmOpen(true)}
-                className="border border-red-500 text-red-400 hover:bg-red-500 hover:text-white rounded-lg px-4 py-2 text-sm transition-colors"
-              >
-                Encerrar assinatura
-              </button>
+              <div className="space-y-4">
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    onClick={() => setConfirmOpen(true)}
+                    className="border border-red-500 text-red-400 hover:bg-red-500 hover:text-white rounded-lg px-4 py-2 text-sm transition-colors"
+                  >
+                    Encerrar assinatura
+                  </button>
+                  <button
+                    onClick={() => setShowUpgrade(v => !v)}
+                    className="border border-slate-700 text-slate-300 hover:border-orange-500 hover:text-orange-500 rounded-lg px-4 py-2 text-sm transition-colors"
+                  >
+                    Mudar plano
+                  </button>
+                </div>
+
+                <AnimatePresence initial={false}>
+                  {showUpgrade && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+                      style={{ overflow: 'hidden' }}
+                    >
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                        {PLANS.map(plan => {
+                          const isCurrent = plan.id === activeBand?.plan
+                          return (
+                            <div
+                              key={plan.id}
+                              className={`rounded-xl border p-4 flex flex-col gap-3 ${
+                                plan.highlight
+                                  ? 'border-orange-500/40 bg-orange-500/5'
+                                  : 'border-slate-700 bg-white/5'
+                              } ${isCurrent ? 'opacity-50' : ''}`}
+                            >
+                              <div className="flex items-start justify-between gap-2 flex-wrap">
+                                <div>
+                                  <p className="text-white font-bold">{plan.name}</p>
+                                  <p>
+                                    <span className="text-orange-400 font-bold">{plan.price}</span>
+                                    <span className="text-slate-500 text-xs">/mês</span>
+                                  </p>
+                                </div>
+                                {isCurrent && (
+                                  <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-700 text-slate-400 px-2 py-0.5 rounded-full shrink-0">
+                                    Plano atual
+                                  </span>
+                                )}
+                              </div>
+                              <ul className="space-y-1.5 flex-1">
+                                {plan.features.map(f => (
+                                  <li key={f} className="flex items-center gap-2 text-xs text-slate-400">
+                                    <Check className="w-3 h-3 text-orange-500 shrink-0" />
+                                    {f}
+                                  </li>
+                                ))}
+                              </ul>
+                              <button
+                                onClick={() => { if (!isCurrent) handleChangePlan(plan) }}
+                                disabled={isCurrent || changingPlan !== null}
+                                className={`w-full h-9 rounded-lg text-sm font-medium transition-colors ${
+                                  isCurrent
+                                    ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                                    : 'bg-orange-500 hover:bg-orange-600 text-white disabled:opacity-60'
+                                }`}
+                              >
+                                {changingPlan === plan.id
+                                  ? 'Migrando...'
+                                  : isCurrent
+                                  ? 'Plano atual'
+                                  : 'Migrar para este plano'}
+                              </button>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             )}
 
             {isCanceling && (
