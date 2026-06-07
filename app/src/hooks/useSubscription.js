@@ -10,7 +10,11 @@ export function useSubscription() {
 
   const isActive   = subscriptionStatus === 'active' || isLifetime
   const isTrialing = !isActive && trialEndsAt !== null && trialEndsAt > now
-  const isExpired  = !isActive && !isTrialing && (trialEndsAt !== null && trialEndsAt <= now)
+  const isExpired  = !isActive && !isTrialing && (
+    subscriptionStatus === 'canceled' ||
+    subscriptionStatus === 'canceling' ||
+    (trialEndsAt !== null && trialEndsAt <= now)
+  )
   const daysLeftInTrial = isTrialing
     ? Math.max(0, Math.ceil((trialEndsAt - now) / (1000 * 60 * 60 * 24)))
     : 0

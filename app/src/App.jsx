@@ -222,8 +222,8 @@ function AppContent({ signOut }) {
     'email-confirm':    <EmailConfirm    {...pageProps} />,
   }
 
-  const EXEMPT_PAGES = ['upgrade', 'subscription', 'payment-success', 'email-confirmed', 'email-confirm']
-  if (isExpired && !EXEMPT_PAGES.includes(page)) return <TrialExpired />
+  const EXEMPT_PAGES = ['payment-success', 'email-confirmed', 'email-confirm']
+  if (isExpired && !EXEMPT_PAGES.includes(page)) return <Subscription {...pageProps} />
 
   return (
     <div className="flex min-h-screen bg-background">

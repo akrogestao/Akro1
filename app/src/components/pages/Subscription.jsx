@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { ArrowLeft, Bell, Check, Zap, AlertTriangle, Loader2 } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useBand } from '@/hooks/useBand.jsx'
+import { useAuth } from '@/hooks/useAuth.jsx'
 import { useStore } from '@/hooks/useStore'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
@@ -47,6 +48,7 @@ function fmtDateBR(iso) {
 
 export default function Subscription({ onNav }) {
   const { activeBand, updateBand } = useBand()
+  const { signOut } = useAuth()
   const { events, members, payments, contractors, checklistItems, rehearsals } = useStore()
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications({
     events, members, payments, contractors, checklistItems, rehearsals,
@@ -88,8 +90,9 @@ export default function Subscription({ onNav }) {
       })
       if (error) throw error
       await updateBand(activeBand.id, { subscription_status: 'canceling' })
-      toast.success('Assinatura encerrada. Acesso mantido até o fim do período atual.')
       setConfirmOpen(false)
+      toast.success('Assinatura cancelada. Você pode assinar novamente a qualquer momento.')
+      await signOut()
     } catch (err) {
       console.error('[cancel-subscription]', err)
       toast.error('Erro ao encerrar assinatura. Tente novamente.')
