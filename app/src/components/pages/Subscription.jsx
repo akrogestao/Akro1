@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { ArrowLeft, Bell, Check, Zap, AlertTriangle, Loader2 } from 'lucide-react'
+import { ArrowLeft, Bell, Check, Zap, AlertTriangle, Loader2, LogOut } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useBand } from '@/hooks/useBand.jsx'
 import { useAuth } from '@/hooks/useAuth.jsx'
@@ -9,6 +9,7 @@ import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import NotificationsDropdown from '@/components/shared/NotificationsDropdown'
 import { useNotifications } from '@/hooks/useNotifications'
+import { useSubscription } from '@/hooks/useSubscription'
 import { PRICE_PROFISSIONAL, PRICE_MULTI_BANDAS } from '@/lib/stripe.js'
 
 const PLANS = [
@@ -49,6 +50,7 @@ function fmtDateBR(iso) {
 export default function Subscription({ onNav }) {
   const { activeBand, updateBand } = useBand()
   const { signOut } = useAuth()
+  const { isExpired: isBlockedMode } = useSubscription()
   const { events, members, payments, contractors, checklistItems, rehearsals } = useStore()
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications({
     events, members, payments, contractors, checklistItems, rehearsals,
@@ -406,12 +408,23 @@ export default function Subscription({ onNav }) {
         )}
 
         {/* Rodapé */}
-        <p className="text-xs text-slate-500 text-center pt-2 pb-4">
-          Dúvidas sobre sua assinatura?{' '}
-          <a href="mailto:contato@akrogestao.com" className="text-orange-500 hover:underline">
-            Entre em contato com o suporte
-          </a>
-        </p>
+        <div className="flex flex-col items-center gap-3 pt-2 pb-4">
+          <p className="text-xs text-slate-500 text-center">
+            Dúvidas sobre sua assinatura?{' '}
+            <a href="mailto:contato@akrogestao.com" className="text-orange-500 hover:underline">
+              Entre em contato com o suporte
+            </a>
+          </p>
+          {isBlockedMode && (
+            <button
+              onClick={signOut}
+              className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-300 transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              Sair da conta
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Dialog de confirmação de encerramento */}

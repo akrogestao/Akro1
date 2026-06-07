@@ -8,11 +8,11 @@ export function useSubscription() {
   const subscriptionStatus = activeBand?.subscription_status ?? null
   const isLifetime      = activeBand?.is_lifetime ?? false
 
-  const isActive   = subscriptionStatus === 'active' || isLifetime
+  // canceling = acesso mantido até fim do período pago → tratado como ativo
+  const isActive   = subscriptionStatus === 'active' || subscriptionStatus === 'canceling' || isLifetime
   const isTrialing = !isActive && trialEndsAt !== null && trialEndsAt > now
   const isExpired  = !isActive && !isTrialing && (
     subscriptionStatus === 'canceled' ||
-    subscriptionStatus === 'canceling' ||
     (trialEndsAt !== null && trialEndsAt <= now)
   )
   const daysLeftInTrial = isTrialing

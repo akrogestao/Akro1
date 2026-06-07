@@ -50,7 +50,8 @@ export function BandProvider({ children }) {
         if (!alreadyCreated && (!check || check.length === 0)) {
           const name = user.user_metadata?.nomeDaBanda || 'Minha Banda'
           const plan = user.user_metadata?.plano || 'profissional'
-          const trial_ends_at = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
+          // trial baseado na criação do usuário — todas as bandas expiram na mesma data
+          const trial_ends_at = new Date(new Date(user.created_at).getTime() + 14 * 24 * 60 * 60 * 1000).toISOString()
           const { data: newBand } = await supabase
             .from('bands')
             .insert({ user_id: user.id, name, plan, trial_ends_at })
@@ -95,7 +96,8 @@ export function BandProvider({ children }) {
     if (!user) return null
     const maxBands = activeBand?.plan === 'multi_bandas' ? 5 : 1
     if (bands.length >= maxBands) return null
-    const trial_ends_at = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
+    // trial baseado na criação do usuário — todas as bandas expiram na mesma data
+    const trial_ends_at = new Date(new Date(user.created_at).getTime() + 14 * 24 * 60 * 60 * 1000).toISOString()
     const { data: newBand, error } = await supabase
       .from('bands')
       .insert({ user_id: user.id, name, plan: activeBand?.plan || 'profissional', trial_ends_at })
