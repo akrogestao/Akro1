@@ -9,13 +9,13 @@ const PLANS = [
   {
     id: 'profissional',
     name: 'Profissional',
-    price: 'R$ 94,99/mês',
+    price: 'R$ 199,00/mês',
     features: ['Até 25 membros', '1 banda', 'Todas as funcionalidades'],
   },
   {
     id: 'multi_bandas',
     name: 'Multi-bandas',
-    price: 'R$ 194,99/mês',
+    price: 'R$ 299,00/mês',
     features: ['Até 5 bandas', 'Membros ilimitados', 'Colaboradores ilimitados'],
   },
 ]

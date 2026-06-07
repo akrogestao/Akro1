@@ -11,7 +11,7 @@ const PLANS = [
   {
     id:       'profissional',
     name:     'Profissional',
-    price:    'R$ 94,99',
+    price:    'R$ 199,00',
     priceId:  PRICE_PROFISSIONAL,
     features: [
       'Até 23 membros',
@@ -24,7 +24,7 @@ const PLANS = [
   {
     id:       'multi_bandas',
     name:     'Multi-bandas',
-    price:    'R$ 194,99',
+    price:    'R$ 299,00',
     priceId:  PRICE_MULTI_BANDAS,
     highlight: true,
     features: [
