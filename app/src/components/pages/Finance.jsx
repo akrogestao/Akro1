@@ -50,6 +50,8 @@ function calcEvent(ev, members, getPayEntry, allExpenses, contractors = []) {
   const combustivel = evExps.filter(e => e.type === 'Combustível').reduce((s, e) => s + (e.amount || 0), 0)
   const outro       = evExps.filter(e => e.type === 'Outro').reduce((s, e) => s + (e.amount || 0), 0)
   const comissao    = evExps.filter(e => e.type === 'Comissão').reduce((s, e) => s + (e.amount || 0), 0)
+  const transporte  = evExps.filter(e => e.type === 'Transporte').reduce((s, e) => s + (e.amount || 0), 0)
+  const pirotecnia  = evExps.filter(e => e.type === 'Pirotecnia').reduce((s, e) => s + (e.amount || 0), 0)
   const comissaoContractorIds = [...new Set(
     evExps.filter(e => e.type === 'Comissão').flatMap(e => e.commission_contractors || [])
   )]
@@ -57,10 +59,10 @@ function calcEvent(ev, members, getPayEntry, allExpenses, contractors = []) {
     const m = members.find(x => x.id === mid)
     return m ? sum + memberCacheVal(m, ev, getPayEntry) : sum
   }, 0)
-  const totalDespesas = alimentacao + hospedagem + combustivel + outro + comissao + caches
+  const totalDespesas = alimentacao + hospedagem + combustivel + outro + comissao + transporte + pirotecnia + caches
   const lucro         = faturamento - totalDespesas
   const margem        = faturamento > 0 ? Math.round((lucro / faturamento) * 100) : 0
-  return { faturamento, alimentacao, hospedagem, combustivel, outro, comissao, comissaoContractorIds, caches, totalDespesas, lucro, margem }
+  return { faturamento, alimentacao, hospedagem, combustivel, outro, comissao, comissaoContractorIds, transporte, pirotecnia, caches, totalDespesas, lucro, margem }
 }
 
 // ── Stat card ─────────────────────────────────────────
@@ -416,6 +418,8 @@ function EventRow({ ev, members, getPayEntry, allExpenses, contractors }) {
     { label: 'Alimentação', val: fin.alimentacao },
     { label: 'Hospedagem',  val: fin.hospedagem  },
     { label: 'Combustível', val: fin.combustivel  },
+    { label: 'Transporte',  val: fin.transporte   },
+    { label: 'Pirotecnia',  val: fin.pirotecnia   },
     { label: 'Outro',       val: fin.outro        },
     ...(fin.comissao > 0 ? [{
       label: `Comissão${comissaoNames.length > 0 ? ` (${comissaoNames.join(', ')})` : ''}`,
