@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase'
 
-export const PRICE_PROFISSIONAL = 'price_1TfW6R9RfW5KSJVBd8DeT0gr'
-export const PRICE_MULTI_BANDAS = 'price_1TfW5w9RfW5KSJVBLidJbx5t'
+export const PRICE_PROFISSIONAL = 'price_1Tg9ib4W1YK1eZ3ZzSGIcBIU'
+export const PRICE_MULTI_BANDAS = 'price_1Tg9iv4W1YK1eZ3ZwM1RmA8T'
 
 export async function initiateCheckout(priceId, _email) {
   try {
