@@ -334,7 +334,7 @@ function PlanCard({ plan, selected, onSelect }) {
 }
 
 function SignupForm({ onSwitch }) {
-  const { signUp } = useAuth()
+  const { signUp, signIn } = useAuth()
   const [step,       setStep]      = useState(1)
   const [bandName,   setBandName]  = useState('')
   const [email,      setEmail]     = useState('')
@@ -376,47 +376,10 @@ function SignupForm({ onSwitch }) {
     if (!selectedPlan) return
     setLoading(true)
     const { error: err } = await signUp(email, password, { nomeDaBanda: bandName, plano: selectedPlan })
+    if (err) { setError(err.message); setLoading(false); return }
+    const { error: loginErr } = await signIn(email, password)
     setLoading(false)
-    if (err) setError(err.message)
-    else setSuccess(true)
-  }
-
-  if (success) {
-    return (
-      <motion.div
-        key="cadastro-success"
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: -20 }}
-        transition={{ duration: 0.2 }}
-        className="w-full max-w-sm flex flex-col items-center text-center"
-      >
-        <MailCheck size={48} className="text-orange-500" />
-        <h2 className="text-xl font-semibold text-white mt-4">Verifique seu email</h2>
-        <p className="text-sm text-slate-400 text-center mt-2 max-w-xs">
-          Enviamos um link de confirmação para {email}. Clique no link para ativar sua conta.
-        </p>
-        <p className="flex items-center gap-1.5 text-xs text-amber-400 text-center mt-3 max-w-xs">
-          <AlertTriangle size={12} className="shrink-0" />
-          Sempre use o link do email mais recente. Links anteriores expiram automaticamente.
-        </p>
-        <button
-          onClick={handleResend}
-          disabled={resendLoading || cooldown > 0}
-          className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-orange-500 mt-5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <RefreshCw size={14} className={resendLoading ? 'animate-spin' : ''} />
-          {cooldown > 0
-            ? `Reenviar em ${cooldown}s`
-            : resendLoading
-              ? 'Reenviando...'
-              : 'Reenviar email de confirmação'}
-        </button>
-        <button onClick={onSwitch} className="text-sm text-orange-500 mt-3 hover:text-orange-400">
-          Voltar ao login
-        </button>
-      </motion.div>
-    )
+    if (loginErr) setError(loginErr.message)
   }
 
   return (
