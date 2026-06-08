@@ -616,8 +616,9 @@ function RecoveryForm({ onSwitch }) {
 }
 
 export default function Auth() {
-  const plan = new URLSearchParams(window.location.search).get('plan')
-  const [mode, setMode] = useState(plan ? 'cadastro' : 'login')
+  const _params = new URLSearchParams(window.location.search)
+  const plan = _params.get('plan')
+  const [mode, setMode] = useState((plan || _params.get('cadastro') === 'true') ? 'cadastro' : 'login')
 
   return (
     <div className="flex overflow-hidden" style={{ width: '100vw', height: '100vh' }}>

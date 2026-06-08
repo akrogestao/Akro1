@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import NotificationsDropdown from '@/components/shared/NotificationsDropdown'
 import { useNotifications } from '@/hooks/useNotifications'
 import { useSubscription } from '@/hooks/useSubscription'
-import { PRICE_PROFISSIONAL, PRICE_MULTI_BANDAS } from '@/lib/stripe.js'
+import { initiateCheckout, PRICE_PROFISSIONAL, PRICE_MULTI_BANDAS } from '@/lib/stripe.js'
 
 const PLANS = [
   {
@@ -49,19 +49,21 @@ function fmtDateBR(iso) {
 
 export default function Subscription({ onNav }) {
   const { activeBand, updateBand } = useBand()
-  const { signOut } = useAuth()
+  const { signOut, session } = useAuth()
+  const email = session?.user?.email || ''
   const { isExpired: isBlockedMode } = useSubscription()
   const { events, members, payments, contractors, checklistItems, rehearsals } = useStore()
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications({
     events, members, payments, contractors, checklistItems, rehearsals,
   })
 
-  const [bellOpen,     setBellOpen]     = useState(false)
-  const [showUpgrade,  setShowUpgrade]  = useState(false)
-  const [confirmOpen,  setConfirmOpen]  = useState(false)
-  const [canceling,    setCanceling]    = useState(false)
-  const [reactivating, setReactivating] = useState(false)
-  const [changingPlan, setChangingPlan] = useState(null)
+  const [bellOpen,        setBellOpen]        = useState(false)
+  const [showUpgrade,     setShowUpgrade]      = useState(false)
+  const [confirmOpen,     setConfirmOpen]      = useState(false)
+  const [canceling,       setCanceling]        = useState(false)
+  const [reactivating,    setReactivating]     = useState(false)
+  const [reactivateFailed, setReactivateFailed] = useState(false)
+  const [changingPlan,    setChangingPlan]     = useState(null)
   const bellRef = useRef(null)
 
   useEffect(() => {
@@ -76,6 +78,7 @@ export default function Subscription({ onNav }) {
   const status      = activeBand?.subscription_status
   const isActive    = status === 'active'
   const isCanceling = status === 'canceling'
+  const hasSubId    = !!activeBand?.stripe_subscription_id
   const currentPlan = PLANS.find(p => p.id === activeBand?.plan) ?? PLANS[0]
   const renewsAt    = fmtDateBR(activeBand?.subscription_renews_at)
 
@@ -118,6 +121,7 @@ export default function Subscription({ onNav }) {
     } catch (err) {
       console.error('[reactivate-subscription]', err)
       toast.error('Erro ao reativar assinatura. Tente novamente.')
+      setReactivateFailed(true)
     } finally {
       setReactivating(false)
     }
@@ -142,6 +146,27 @@ export default function Subscription({ onNav }) {
       toast.error('Erro ao migrar plano. Tente novamente.')
     } finally {
       setChangingPlan(null)
+    }
+  }
+
+  async function handleAssinar(plan) {
+    setChangingPlan(plan.id)
+    try {
+      await initiateCheckout(plan.priceId, email)
+    } catch (err) {
+      console.error('[initiateCheckout]', err)
+      toast.error('Erro ao iniciar checkout. Tente novamente.')
+    } finally {
+      setChangingPlan(null)
+    }
+  }
+
+  // Botão correto nos cards de plano: muda plano se já tiver sub ativa, senão checkout
+  function handlePlanAction(plan) {
+    if (isActive || isCanceling) {
+      handleChangePlan(plan)
+    } else {
+      handleAssinar(plan)
     }
   }
 
@@ -212,7 +237,31 @@ export default function Subscription({ onNav }) {
             </p>
           )}
 
-          {!isActive && !isCanceling && (
+          {/* Modo bloqueado: reativar se tiver sub_id, senão escolher plano */}
+          {isBlockedMode && hasSubId && !reactivateFailed && (
+            <button
+              onClick={handleReactivate}
+              disabled={reactivating}
+              className="h-10 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white text-sm font-medium transition-colors flex items-center gap-2"
+            >
+              {reactivating && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+              {reactivating ? 'Reativando...' : 'Reativar assinatura'}
+            </button>
+          )}
+
+          {/* Modo bloqueado sem sub_id ou após falha: mostrar seletor de planos */}
+          {isBlockedMode && (!hasSubId || reactivateFailed) && (
+            <button
+              onClick={() => setShowUpgrade(v => !v)}
+              className="h-10 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium transition-colors flex items-center gap-2"
+            >
+              <Zap className="w-3.5 h-3.5" />
+              Escolher plano
+            </button>
+          )}
+
+          {/* Trial / sem assinatura: upgrade normal */}
+          {!isActive && !isCanceling && !isBlockedMode && (
             <button
               onClick={() => setShowUpgrade(v => !v)}
               className="h-10 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium transition-colors flex items-center gap-2"
@@ -223,7 +272,7 @@ export default function Subscription({ onNav }) {
           )}
         </div>
 
-        {/* Seletor de upgrade — apenas para status null/trial/expired */}
+        {/* Seletor de planos — para trial, blocked e upgrade */}
         <AnimatePresence initial={false}>
           {showUpgrade && !isActive && !isCanceling && (
             <motion.div
@@ -234,7 +283,7 @@ export default function Subscription({ onNav }) {
               style={{ overflow: 'hidden' }}
             >
               <div className="border border-slate-800 rounded-2xl p-6">
-                <p className="text-sm font-semibold text-white mb-4">Selecione o novo plano</p>
+                <p className="text-sm font-semibold text-white mb-4">Selecione o plano</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {PLANS.map(plan => {
                     const isCurrent = plan.id === activeBand?.plan
@@ -245,21 +294,14 @@ export default function Subscription({ onNav }) {
                           plan.highlight
                             ? 'border-orange-500/40 bg-orange-500/5'
                             : 'border-slate-700 bg-white/5'
-                        } ${isCurrent ? 'opacity-50' : ''}`}
+                        }`}
                       >
-                        <div className="flex items-start justify-between gap-2 flex-wrap">
-                          <div>
-                            <p className="text-white font-bold">{plan.name}</p>
-                            <p>
-                              <span className="text-orange-400 font-bold">{plan.price}</span>
-                              <span className="text-slate-500 text-xs">/mês</span>
-                            </p>
-                          </div>
-                          {isCurrent && (
-                            <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-700 text-slate-400 px-2 py-0.5 rounded-full shrink-0">
-                              Plano atual
-                            </span>
-                          )}
+                        <div>
+                          <p className="text-white font-bold">{plan.name}</p>
+                          <p>
+                            <span className="text-orange-400 font-bold">{plan.price}</span>
+                            <span className="text-slate-500 text-xs">/mês</span>
+                          </p>
                         </div>
                         <ul className="space-y-1.5 flex-1">
                           {plan.features.map(f => (
@@ -270,19 +312,13 @@ export default function Subscription({ onNav }) {
                           ))}
                         </ul>
                         <button
-                          onClick={() => { if (!isCurrent) handleChangePlan(plan) }}
-                          disabled={isCurrent || changingPlan !== null}
-                          className={`w-full h-9 rounded-lg text-sm font-medium transition-colors ${
-                            isCurrent
-                              ? 'bg-slate-800 text-slate-500 cursor-not-allowed'
-                              : 'bg-orange-500 hover:bg-orange-600 text-white disabled:opacity-60'
-                          }`}
+                          onClick={() => handlePlanAction(plan)}
+                          disabled={changingPlan !== null}
+                          className="w-full h-9 rounded-lg text-sm font-medium transition-colors bg-orange-500 hover:bg-orange-600 text-white disabled:opacity-60"
                         >
                           {changingPlan === plan.id
-                            ? 'Migrando...'
-                            : isCurrent
-                            ? 'Plano atual'
-                            : 'Migrar para este plano'}
+                            ? (isBlockedMode ? 'Redirecionando...' : 'Migrando...')
+                            : 'Assinar'}
                         </button>
                       </div>
                     )
@@ -293,7 +329,7 @@ export default function Subscription({ onNav }) {
           )}
         </AnimatePresence>
 
-        {/* Bloco cancelar / reativar */}
+        {/* Bloco cancelar / reativar — apenas quando ativo ou cancelando */}
         {(isActive || isCanceling) && (
           <div className="border border-slate-800 rounded-2xl p-6">
             <p className="text-base font-medium text-white mb-1">Cancelar assinatura</p>
