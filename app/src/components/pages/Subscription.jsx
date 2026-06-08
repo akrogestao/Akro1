@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import NotificationsDropdown from '@/components/shared/NotificationsDropdown'
 import { useNotifications } from '@/hooks/useNotifications'
 import { useSubscription } from '@/hooks/useSubscription'
-import { initiateCheckout, PRICE_PROFISSIONAL, PRICE_MULTI_BANDAS } from '@/lib/stripe.js'
+import { PRICE_PROFISSIONAL, PRICE_MULTI_BANDAS } from '@/lib/stripe.js'
 
 const PLANS = [
   {
@@ -152,9 +152,31 @@ export default function Subscription({ onNav }) {
   async function handleAssinar(plan) {
     setChangingPlan(plan.id)
     try {
-      await initiateCheckout(plan.priceId, email)
+      const { data: { session: authSession }, error: sessionErr } = await supabase.auth.getSession()
+      if (sessionErr || !authSession?.user) {
+        throw new Error('Sessão inválida. Faça login novamente.')
+      }
+      const userId = authSession.user.id
+      let bandId = localStorage.getItem('bm_active_band_id')
+      if (!bandId) {
+        const { data: bands, error: bandsErr } = await supabase
+          .from('bands')
+          .select('id')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: true })
+          .limit(1)
+        if (bandsErr) throw bandsErr
+        bandId = bands?.[0]?.id ?? null
+      }
+      if (!bandId) throw new Error('Nenhuma banda encontrada para este usuário.')
+      const { data, error } = await supabase.functions.invoke('create-checkout-session', {
+        body: { priceId: plan.priceId, userId, bandId },
+      })
+      if (error) throw error
+      if (!data?.url) throw new Error('URL de checkout não retornada pelo servidor.')
+      window.location.href = data.url
     } catch (err) {
-      console.error('[initiateCheckout]', err)
+      console.error('[handleAssinar] Erro ao iniciar checkout:', err)
       toast.error('Erro ao iniciar checkout. Tente novamente.')
     } finally {
       setChangingPlan(null)
