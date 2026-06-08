@@ -118,6 +118,7 @@ export default function Subscription({ onNav }) {
         ...(data?.renews_at ? { subscription_renews_at: data.renews_at } : {}),
       })
       toast.success('Assinatura reativada com sucesso!')
+      onNav('dashboard')
     } catch (err) {
       console.error('[reactivate-subscription]', err)
       toast.error('Erro ao reativar assinatura. Tente novamente.')
@@ -259,29 +260,6 @@ export default function Subscription({ onNav }) {
             </p>
           )}
 
-          {/* Modo bloqueado: reativar se tiver sub_id, senão escolher plano */}
-          {isBlockedMode && hasSubId && !reactivateFailed && (
-            <button
-              onClick={handleReactivate}
-              disabled={reactivating}
-              className="h-10 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white text-sm font-medium transition-colors flex items-center gap-2"
-            >
-              {reactivating && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-              {reactivating ? 'Reativando...' : 'Reativar assinatura'}
-            </button>
-          )}
-
-          {/* Modo bloqueado sem sub_id ou após falha: mostrar seletor de planos */}
-          {isBlockedMode && (!hasSubId || reactivateFailed) && (
-            <button
-              onClick={() => setShowUpgrade(v => !v)}
-              className="h-10 px-5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium transition-colors flex items-center gap-2"
-            >
-              <Zap className="w-3.5 h-3.5" />
-              Escolher plano
-            </button>
-          )}
-
           {/* Trial / sem assinatura: upgrade normal */}
           {!isActive && !isCanceling && !isBlockedMode && (
             <button
@@ -294,9 +272,26 @@ export default function Subscription({ onNav }) {
           )}
         </div>
 
-        {/* Seletor de planos — para trial, blocked e upgrade */}
+        {/* Modo bloqueado com sub_id: layout simples de reativação */}
+        {isBlockedMode && hasSubId && !reactivateFailed && (
+          <div className="border border-slate-800 rounded-2xl p-6 space-y-3">
+            <button
+              onClick={handleReactivate}
+              disabled={reactivating}
+              className="w-full h-12 rounded-xl bg-orange-500 hover:bg-orange-600 disabled:opacity-60 text-white font-semibold transition-colors flex items-center justify-center gap-2"
+            >
+              {reactivating && <Loader2 className="w-4 h-4 animate-spin" />}
+              {reactivating ? 'Reativando...' : 'Reativar assinatura'}
+            </button>
+            <p className="text-xs text-slate-500 text-center">
+              Sua assinatura será reativada no plano {currentPlan.name} por {currentPlan.price} por mês.
+            </p>
+          </div>
+        )}
+
+        {/* Seletor de planos — para trial, blocked sem sub_id/falha e upgrade ativo */}
         <AnimatePresence initial={false}>
-          {showUpgrade && !isActive && !isCanceling && (
+          {!isActive && !isCanceling && ((isBlockedMode && (!hasSubId || reactivateFailed)) || showUpgrade) && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
@@ -468,10 +463,7 @@ export default function Subscription({ onNav }) {
         {/* Rodapé */}
         <div className="flex flex-col items-center gap-3 pt-2 pb-4">
           <p className="text-xs text-slate-500 text-center">
-            Dúvidas sobre sua assinatura?{' '}
-            <a href="mailto:akro.gestao@gmail.com" className="text-orange-500 hover:underline">
-              Entre em contato com o suporte
-            </a>
+            Entre em contato com o suporte no e-mail: <span className="text-orange-500">akro.gestao@gmail.com</span>
           </p>
           {isBlockedMode && (
             <button
