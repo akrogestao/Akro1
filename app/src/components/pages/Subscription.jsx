@@ -469,7 +469,7 @@ export default function Subscription({ onNav }) {
         <div className="flex flex-col items-center gap-3 pt-2 pb-4">
           <p className="text-xs text-slate-500 text-center">
             Dúvidas sobre sua assinatura?{' '}
-            <a href="mailto:contato@akrogestao.com" className="text-orange-500 hover:underline">
+            <a href="mailto:akro.gestao@gmail.com" className="text-orange-500 hover:underline">
               Entre em contato com o suporte
             </a>
           </p>

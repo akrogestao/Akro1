@@ -90,8 +90,8 @@ export default function EmailConfirm({ onNav }) {
       <div className="absolute bottom-8 left-0 right-0 text-center">
         <p className="text-xs text-slate-600">
           Se tiver algum problema entre em contato pelo{' '}
-          <a href="mailto:contato@akrogestao.com" className="text-orange-500">
-            contato@akrogestao.com
+          <a href="mailto:akro.gestao@gmail.com" className="text-orange-500">
+            akro.gestao@gmail.com
           </a>
         </p>
       </div>

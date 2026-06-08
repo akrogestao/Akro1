@@ -73,7 +73,7 @@ export default function TrialExpired() {
         </div>
 
         <a
-          href="mailto:contato@akro.com.br"
+          href="mailto:akro.gestao@gmail.com"
           className="text-xs text-slate-500 hover:text-slate-400 transition-colors mt-2"
         >
           Falar com suporte
