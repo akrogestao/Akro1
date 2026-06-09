@@ -5,9 +5,9 @@ export const supabase = createClient(
   import.meta.env.VITE_SUPABASE_ANON_KEY,
   {
     auth: {
-      persistSession: true,
+      persistSession:   true,
       autoRefreshToken: true,
-      storageKey: 'bm_auth_session',
+      storageKey:       'bm_auth_session',
     },
   }
 )

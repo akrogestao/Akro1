@@ -30,7 +30,10 @@ import { toast } from 'sonner'
 const BrazilMap = lazy(() => import('@/components/shared/BrazilMap'))
 
 // ── Expense type config ───────────────────────────────
-const EXP_TYPES = ['Alimentação', 'Hospedagem', 'Combustível', 'Comissão', 'Transporte', 'Passagens', 'Pirotecnia', 'Imposto', 'Outro']
+const EXP_TYPES = [
+  'Alimentação', 'Hospedagem', 'Combustível', 'Comissão',
+  'Transporte', 'Passagens', 'Pirotecnia', 'Imposto', 'Outro',
+]
 const EXP_STYLE = {
   'Alimentação': { variant: 'warning',   Icon: UtensilsCrossed, color: 'text-orange-600', bg: 'bg-orange-50',   border: 'border-orange-100' },
   'Hospedagem':  { variant: 'blue',      Icon: Bed,             color: 'text-blue-600',   bg: 'bg-blue-50',     border: 'border-blue-100'   },
