@@ -4,7 +4,7 @@ import {
   ChevronLeft, ChevronRight, ChevronDown, MapPin, Navigation,
   Plus, Pencil, Trash2, UtensilsCrossed, Bed, Fuel, Receipt, Tag, Percent,
   Star, X, Users, CheckCircle2, Clock, Printer, AlertTriangle, DollarSign,
-  Bus, Sparkles,
+  Bus, Sparkles, Ticket,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -30,14 +30,16 @@ import { toast } from 'sonner'
 const BrazilMap = lazy(() => import('@/components/shared/BrazilMap'))
 
 // ── Expense type config ───────────────────────────────
-const EXP_TYPES = ['Alimentação', 'Hospedagem', 'Combustível', 'Comissão', 'Transporte', 'Pirotecnia', 'Outro']
+const EXP_TYPES = ['Alimentação', 'Hospedagem', 'Combustível', 'Comissão', 'Transporte', 'Passagens', 'Pirotecnia', 'Imposto', 'Outro']
 const EXP_STYLE = {
   'Alimentação': { variant: 'warning',   Icon: UtensilsCrossed, color: 'text-orange-600', bg: 'bg-orange-50',   border: 'border-orange-100' },
   'Hospedagem':  { variant: 'blue',      Icon: Bed,             color: 'text-blue-600',   bg: 'bg-blue-50',     border: 'border-blue-100'   },
   'Combustível': { variant: 'secondary', Icon: Fuel,            color: 'text-violet-600', bg: 'bg-violet-50',   border: 'border-violet-100' },
   'Comissão':    { variant: 'default',   Icon: Percent,         color: 'text-rose-600',   bg: 'bg-rose-50',     border: 'border-rose-100'   },
   'Transporte':  { variant: 'blue',      Icon: Bus,             color: 'text-cyan-600',   bg: 'bg-cyan-50',     border: 'border-cyan-100'   },
+  'Passagens':   { variant: 'blue',      Icon: Ticket,          color: 'text-sky-600',    bg: 'bg-sky-50',      border: 'border-sky-100'    },
   'Pirotecnia':  { variant: 'warning',   Icon: Sparkles,        color: 'text-yellow-600', bg: 'bg-yellow-50',   border: 'border-yellow-100' },
+  'Imposto':     { variant: 'outline',   Icon: Receipt,         color: 'text-slate-600',  bg: 'bg-slate-50',    border: 'border-slate-200'  },
   'Outro':       { variant: 'outline',   Icon: Tag,             color: 'text-slate-600',  bg: 'bg-slate-50',    border: 'border-slate-200'  },
 }
 
